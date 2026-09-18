@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Kalori">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#10b981" />
+      <stop offset="1" stop-color="#0f766e" />
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="16" fill="url(#g)" />
+  <path
+    d="M32 12c6 7.6 12.5 12.4 12.5 21.3C44.5 42.4 38.9 48 32 48s-12.5-5.6-12.5-14.7C19.5 25.6 24.6 21.3 27.8 15c1.2 3.9 2.4 6.2 4.2 8.4 2.3-3.5 2.6-7 0-11.4Z"
+    fill="#fff"
+    opacity=".95"
+  />
+  <path d="M32 48c-4.4 0-7.6-2.9-7.6-7.3 0-4.4 3.6-7.2 7.6-12.2 4 5 7.6 7.8 7.6 12.2C39.6 45.1 36.4 48 32 48Z" fill="#0f766e" opacity=".35" />
+</svg>

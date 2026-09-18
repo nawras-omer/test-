@@ -1,0 +1,311 @@
+/* ============================================================================
+   Kalori — Design tokens
+   ----------------------------------------------------------------------------
+   How theming works
+   -----------------
+   1. A *palette* (green | blue | purple | warm) only swaps the raw HSL channels
+      below. Nothing else in the stylesheet knows about colour names.
+   2. A *mode* (light | dark) swaps the neutral surfaces + the lightness of the
+      brand colours.
+   3. Every component consumes *semantic* tokens (--primary, --surface, --text,
+      --border …), never raw hues — so a single attribute flip on <html>
+      restyles the entire UI.
+   4. Everything is written with CSS *logical* properties (inline-start/end) so
+      LTR and RTL mirror automatically.
+
+       <html data-palette="green" data-mode="light" lang="en" dir="ltr">
+   ========================================================================== */
+
+/* ------------------------------------------------------------------ *
+ * Palette channels — the only values a palette swatch changes.
+ * ------------------------------------------------------------------ */
+:root,
+:root[data-palette='green'] {
+  --brand-h: 160;
+  --brand-s: 64%;
+  --brand-l: 36%;
+
+  --accent-h: 174; /* secondary hue: teal  */
+  --accent-s: 62%;
+  --accent-l: 42%;
+
+  --tint-h: 88; /* chart / highlight hue: fresh lime */
+  --tint-s: 62%;
+  --tint-l: 48%;
+
+  --gradient-from: hsl(160 66% 40%);
+  --gradient-to: hsl(174 60% 34%);
+}
+
+:root[data-palette='blue'] {
+  --brand-h: 214;
+  --brand-s: 76%;
+  --brand-l: 46%;
+
+  --accent-h: 190;
+  --accent-s: 82%;
+  --accent-l: 45%;
+
+  --tint-h: 258;
+  --tint-s: 70%;
+  --tint-l: 58%;
+
+  --gradient-from: hsl(214 78% 50%);
+  --gradient-to: hsl(190 80% 42%);
+}
+
+:root[data-palette='purple'] {
+  --brand-h: 268;
+  --brand-s: 62%;
+  --brand-l: 52%;
+
+  --accent-h: 316;
+  --accent-s: 66%;
+  --accent-l: 56%;
+
+  --tint-h: 196;
+  --tint-s: 78%;
+  --tint-l: 48%;
+
+  --gradient-from: hsl(268 64% 56%);
+  --gradient-to: hsl(316 66% 52%);
+}
+
+:root[data-palette='warm'] {
+  --brand-h: 20;
+  --brand-s: 68%;
+  --brand-l: 47%;
+
+  --accent-h: 40;
+  --accent-s: 80%;
+  --accent-l: 50%;
+
+  --tint-h: 96;
+  --tint-s: 42%;
+  --tint-l: 42%;
+
+  --gradient-from: hsl(20 70% 52%);
+  --gradient-to: hsl(38 78% 48%);
+}
+
+/* ------------------------------------------------------------------ *
+ * Static scales
+ * ------------------------------------------------------------------ */
+:root {
+  /* type */
+  --font-sans:
+    'Plus Jakarta Sans', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue',
+    Arial, sans-serif;
+  --font-display: var(--font-sans);
+  --font-numeric: var(--font-sans);
+
+  --text-xs: 0.75rem;
+  --text-sm: 0.8125rem;
+  --text-base: 0.9375rem;
+  --text-md: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.375rem;
+  --text-2xl: 1.75rem;
+  --text-3xl: 2.25rem;
+  --text-4xl: clamp(2rem, 1.4rem + 2.4vw, 3rem);
+
+  --leading-tight: 1.2;
+  --leading-snug: 1.4;
+  --leading-normal: 1.6;
+
+  /* space */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-10: 2.5rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+
+  /* radii */
+  --radius-xs: 6px;
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-xl: 28px;
+  --radius-full: 999px;
+
+  /* layout */
+  --container: 1200px;
+  --navbar-height: 68px;
+
+  /* motion */
+  --ease: cubic-bezier(0.32, 0.72, 0, 1);
+  --duration-fast: 120ms;
+  --duration: 220ms;
+  --duration-slow: 420ms;
+
+  /* z-index */
+  --z-navbar: 100;
+  --z-dropdown: 200;
+  --z-overlay: 300;
+
+  /* status colours (mode-tuned below) */
+  --success-h: 152;
+  --warning-h: 38;
+  --danger-h: 358;
+  --info-h: 214;
+}
+
+/* Right-to-left scripts get a typeface designed for Arabic letterforms. */
+:root:is([lang='ar'], [lang='ckb']) {
+  --font-sans: 'Noto Kufi Arabic', 'Segoe UI', Tahoma, 'Plus Jakarta Sans', system-ui, sans-serif;
+  --text-base: 0.9375rem;
+  --leading-normal: 1.85; /* Arabic script needs more vertical room */
+  --letter-tight: 0;
+}
+
+/* ------------------------------------------------------------------ *
+ * LIGHT MODE (default)
+ * ------------------------------------------------------------------ */
+:root {
+  color-scheme: light;
+
+  /* brand */
+  --primary: hsl(var(--brand-h) var(--brand-s) var(--brand-l));
+  --primary-hover: hsl(var(--brand-h) calc(var(--brand-s) + 4%) calc(var(--brand-l) - 7%));
+  --primary-active: hsl(var(--brand-h) calc(var(--brand-s) + 4%) calc(var(--brand-l) - 13%));
+  --primary-soft: hsl(var(--brand-h) 62% 95.5%);
+  --primary-soft-hover: hsl(var(--brand-h) 58% 93%);
+  --primary-border: hsl(var(--brand-h) 52% 86%);
+  --primary-contrast: hsl(0 0% 100%);
+  --on-primary: hsl(0 0% 100%);
+
+  --accent: hsl(var(--accent-h) var(--accent-s) var(--accent-l));
+  --accent-soft: hsl(var(--accent-h) 62% 94%);
+  --tint: hsl(var(--tint-h) var(--tint-s) var(--tint-l));
+  --tint-soft: hsl(var(--tint-h) 58% 93%);
+  --gradient-brand: linear-gradient(135deg, var(--gradient-from), var(--gradient-to));
+
+  /* surfaces */
+  --bg: hsl(var(--brand-h) 26% 98.2%);
+  --bg-elevated: hsl(0 0% 100%);
+  --surface: hsl(0 0% 100%);
+  --surface-2: hsl(var(--brand-h) 24% 96.6%);
+  --surface-3: hsl(var(--brand-h) 20% 93.5%);
+  --surface-inverse: hsl(var(--brand-h) 28% 12%);
+  --overlay: hsl(var(--brand-h) 30% 12% / 0.45);
+  --glass: hsl(0 0% 100% / 0.82);
+
+  /* text */
+  --text: hsl(var(--brand-h) 26% 11%);
+  --text-muted: hsl(var(--brand-h) 12% 40%);
+  --text-soft: hsl(var(--brand-h) 10% 54%);
+  --text-inverse: hsl(0 0% 100%);
+
+  /* lines + shadows */
+  --border: hsl(var(--brand-h) 20% 89%);
+  --border-strong: hsl(var(--brand-h) 16% 79%);
+  --divider: hsl(var(--brand-h) 18% 92%);
+  --shadow-xs: 0 1px 2px hsl(var(--brand-h) 30% 16% / 0.05);
+  --shadow-sm: 0 1px 2px hsl(var(--brand-h) 30% 16% / 0.06), 0 2px 8px -4px hsl(var(--brand-h) 30% 16% / 0.12);
+  --shadow-md: 0 2px 4px hsl(var(--brand-h) 30% 16% / 0.05), 0 12px 28px -14px hsl(var(--brand-h) 30% 16% / 0.22);
+  --shadow-lg: 0 4px 8px hsl(var(--brand-h) 30% 16% / 0.05), 0 26px 60px -24px hsl(var(--brand-h) 30% 16% / 0.28);
+  --shadow-brand: 0 10px 30px -10px hsl(var(--brand-h) var(--brand-s) var(--brand-l) / 0.55);
+
+  /* focus ring */
+  --ring: 0 0 0 3px hsl(var(--brand-h) var(--brand-s) 55% / 0.35);
+  --ring-danger: 0 0 0 3px hsl(var(--danger-h) 72% 56% / 0.3);
+
+  /* status */
+  --success: hsl(var(--success-h) 58% 36%);
+  --success-soft: hsl(var(--success-h) 62% 94%);
+  --warning: hsl(var(--warning-h) 82% 42%);
+  --warning-soft: hsl(var(--warning-h) 88% 94%);
+  --danger: hsl(var(--danger-h) 68% 48%);
+  --danger-soft: hsl(var(--danger-h) 84% 96%);
+  --info: hsl(var(--info-h) 74% 46%);
+  --info-soft: hsl(var(--info-h) 78% 95%);
+
+  /* data-visualisation helpers */
+  --chart-grid: hsl(var(--brand-h) 18% 90%);
+  --track: hsl(var(--brand-h) 22% 92%);
+  --macro-protein: hsl(var(--brand-h) var(--brand-s) calc(var(--brand-l) + 8%));
+  --macro-carbs: hsl(var(--accent-h) var(--accent-s) calc(var(--accent-l) + 6%));
+  --macro-fat: hsl(var(--tint-h) var(--tint-s) calc(var(--tint-l) + 4%));
+  --macro-water: hsl(200 78% 52%);
+}
+
+/* ------------------------------------------------------------------ *
+ * DARK MODE
+ * ------------------------------------------------------------------ */
+:root[data-mode='dark'] {
+  color-scheme: dark;
+
+  --primary: hsl(var(--brand-h) calc(var(--brand-s) - 6%) 60%);
+  --primary-hover: hsl(var(--brand-h) calc(var(--brand-s) - 2%) 67%);
+  --primary-active: hsl(var(--brand-h) calc(var(--brand-s) - 2%) 72%);
+  --primary-soft: hsl(var(--brand-h) 26% 20%);
+  --primary-soft-hover: hsl(var(--brand-h) 26% 24%);
+  --primary-border: hsl(var(--brand-h) 22% 30%);
+  --primary-contrast: hsl(var(--brand-h) 60% 97%);
+  --on-primary: hsl(var(--brand-h) 60% 10%);
+
+  --accent: hsl(var(--accent-h) calc(var(--accent-s) - 6%) 58%);
+  --accent-soft: hsl(var(--accent-h) 26% 20%);
+  --tint: hsl(var(--tint-h) calc(var(--tint-s) - 4%) 60%);
+  --tint-soft: hsl(var(--tint-h) 24% 19%);
+  --gradient-brand: linear-gradient(
+    135deg,
+    hsl(var(--brand-h) 56% 34%),
+    hsl(var(--accent-h) 52% 28%)
+  );
+
+  --bg: hsl(var(--brand-h) 18% 7.5%);
+  --bg-elevated: hsl(var(--brand-h) 16% 11%);
+  --surface: hsl(var(--brand-h) 16% 10.5%);
+  --surface-2: hsl(var(--brand-h) 15% 14.5%);
+  --surface-3: hsl(var(--brand-h) 14% 19%);
+  --surface-inverse: hsl(var(--brand-h) 20% 94%);
+  --overlay: hsl(0 0% 0% / 0.62);
+  --glass: hsl(var(--brand-h) 18% 10% / 0.78);
+
+  --text: hsl(var(--brand-h) 20% 96%);
+  --text-muted: hsl(var(--brand-h) 12% 68%);
+  --text-soft: hsl(var(--brand-h) 10% 57%);
+  --text-inverse: hsl(var(--brand-h) 24% 10%);
+
+  --border: hsl(var(--brand-h) 14% 21%);
+  --border-strong: hsl(var(--brand-h) 13% 31%);
+  --divider: hsl(var(--brand-h) 14% 17%);
+  --shadow-xs: 0 1px 2px hsl(0 0% 0% / 0.3);
+  --shadow-sm: 0 1px 2px hsl(0 0% 0% / 0.35), 0 2px 10px -4px hsl(0 0% 0% / 0.5);
+  --shadow-md: 0 2px 6px hsl(0 0% 0% / 0.3), 0 16px 34px -18px hsl(0 0% 0% / 0.7);
+  --shadow-lg: 0 6px 12px hsl(0 0% 0% / 0.3), 0 32px 70px -28px hsl(0 0% 0% / 0.8);
+  --shadow-brand: 0 12px 32px -14px hsl(var(--brand-h) var(--brand-s) 40% / 0.7);
+
+  --ring: 0 0 0 3px hsl(var(--brand-h) var(--brand-s) 60% / 0.4);
+  --ring-danger: 0 0 0 3px hsl(var(--danger-h) 70% 60% / 0.35);
+
+  --success: hsl(var(--success-h) 52% 58%);
+  --success-soft: hsl(var(--success-h) 30% 18%);
+  --warning: hsl(var(--warning-h) 80% 60%);
+  --warning-soft: hsl(var(--warning-h) 30% 18%);
+  --danger: hsl(var(--danger-h) 72% 64%);
+  --danger-soft: hsl(var(--danger-h) 30% 19%);
+  --info: hsl(var(--info-h) 76% 64%);
+  --info-soft: hsl(var(--info-h) 30% 19%);
+
+  --chart-grid: hsl(var(--brand-h) 14% 20%);
+  --track: hsl(var(--brand-h) 14% 20%);
+  --macro-protein: hsl(var(--brand-h) calc(var(--brand-s) - 6%) 62%);
+  --macro-carbs: hsl(var(--accent-h) calc(var(--accent-s) - 6%) 60%);
+  --macro-fat: hsl(var(--tint-h) calc(var(--tint-s) - 8%) 62%);
+  --macro-water: hsl(200 72% 62%);
+}
+
+/* Keep the browser UI (address bar / form controls) in step with the palette. */
+:root[data-mode='light'] {
+  --meta-theme: hsl(0 0% 100%);
+}
+:root[data-mode='dark'] {
+  --meta-theme: hsl(var(--brand-h) 18% 7.5%);
+}
