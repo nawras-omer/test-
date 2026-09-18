@@ -1,9 +1,9 @@
 import { CalendarIcon, GlobeIcon, LogOutIcon, PaletteIcon, TargetIcon, UserIcon } from '@/components/ui/Icons'
 import { useAuth } from '@/lib/auth'
 import { useTheme } from '@/lib/theme'
-import { formatDate } from '@/lib/format'
+import { formatDate, formatNumber } from '@/lib/format'
 import { initials } from '@/lib/utils'
-import { useComingSoon } from '@/hooks/useComingSoon'
+import { GoalsCard } from '@/components/settings/GoalsCard'
 import { useI18n } from '@/i18n'
 
 /** Read-only account overview — editing arrives with the profile module. */
@@ -11,7 +11,6 @@ export function ProfilePage() {
   const { t, locale, meta } = useI18n()
   const { user, logout } = useAuth()
   const { palette, mode, palettes } = useTheme()
-  const comingSoon = useComingSoon()
 
   if (!user) return null
 
@@ -25,6 +24,12 @@ export function ProfilePage() {
       value: formatDate(user.createdAt, locale, { day: 'numeric', month: 'long', year: 'numeric' }),
     },
     { key: 'language', icon: <GlobeIcon size={17} />, label: t('pages.profile.language'), value: meta.native },
+    {
+      key: 'goal',
+      icon: <TargetIcon size={17} />,
+      label: t('pages.profile.goal'),
+      value: `${formatNumber(user.goals?.calories ?? 0, locale)} ${t('common.kcal')}`,
+    },
     {
       key: 'theme',
       icon: <PaletteIcon size={17} />,
@@ -44,9 +49,6 @@ export function ProfilePage() {
           <p className="page__subtitle">{t('pages.profile.subtitle')}</p>
         </div>
         <div className="page__actions">
-          <button type="button" className="btn btn--outline" onClick={comingSoon}>
-            {t('common.save')}
-          </button>
           <button type="button" className="btn btn--danger" onClick={() => void logout()}>
             <LogOutIcon size={18} />
             {t('actions.signOut')}
@@ -79,28 +81,7 @@ export function ProfilePage() {
           </ul>
         </section>
 
-        <section className="card card--pad">
-          <div className="row" style={{ gap: 'var(--space-3)', marginBottom: 'var(--space-4)' }}>
-            <span className="stat__icon" aria-hidden="true">
-              <TargetIcon size={19} />
-            </span>
-            <div>
-              <h2 className="card__title">{t('pages.profile.goal')}</h2>
-              <p className="card__subtitle">{t('settings.profile.body')}</p>
-            </div>
-          </div>
-
-          <div className="placeholder">{t('common.comingSoon')}</div>
-
-          <button
-            type="button"
-            className="btn btn--secondary btn--block"
-            style={{ marginTop: 'var(--space-4)' }}
-            onClick={comingSoon}
-          >
-            {t('actions.retry')}
-          </button>
-        </section>
+        <GoalsCard />
       </div>
     </div>
   )

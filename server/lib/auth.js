@@ -49,5 +49,6 @@ export function publicUser(user) {
     email: user.email,
     createdAt: user.createdAt,
     preferences: user.preferences,
+    goals: user.goals,
   }
 }

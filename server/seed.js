@@ -3,7 +3,7 @@
  *   demo@kalori.app / demo1234
  * Idempotent — safe to run on every boot (`node server/seed.js` also works).
  */
-import { db } from './lib/store.js'
+import { DEFAULT_GOALS, DEFAULT_PREFERENCES, db } from './lib/store.js'
 import { hashPassword } from './lib/auth.js'
 
 export const DEMO_EMAIL = 'demo@kalori.app'
@@ -19,7 +19,8 @@ export async function seedDemoUser() {
     name: 'Demo User',
     email: DEMO_EMAIL,
     passwordHash: await hashPassword(DEMO_PASSWORD),
-    preferences: { language: 'en', palette: 'green', colorMode: 'light' },
+    preferences: { ...DEFAULT_PREFERENCES },
+    goals: { ...DEFAULT_GOALS },
     createdAt: now,
     updatedAt: now,
     demo: true,

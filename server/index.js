@@ -4,6 +4,7 @@ import { fileURLToPath } from 'node:url'
 import express from 'express'
 import cors from 'cors'
 import authRoutes from './routes/auth.js'
+import entryRoutes from './routes/entries.js'
 import { seedDemoUser } from './seed.js'
 import { storeFile } from './lib/store.js'
 
@@ -23,6 +24,7 @@ app.get('/api/health', (_req, res) => {
 })
 
 app.use('/api/auth', authRoutes)
+app.use('/api/entries', entryRoutes)
 
 // Optional: serve the production build from this process too
 // (`npm run build && SERVE_STATIC=1 npm start`).

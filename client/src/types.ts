@@ -14,12 +14,21 @@ export interface UserPreferences {
   colorMode: ColorMode
 }
 
+/** Daily targets the dashboard measures against. */
+export interface UserGoals {
+  calories: number
+  protein: number
+  carbs: number
+  fat: number
+}
+
 export interface User {
   id: string
   name: string
   email: string
   createdAt: string
   preferences: UserPreferences
+  goals: UserGoals
 }
 
 export interface AuthResponse {
@@ -39,6 +48,52 @@ export interface LoginInput {
   password: string
 }
 
+/* ------------------------------------------------------------------ diary -- */
+
+export type MealType = 'breakfast' | 'lunch' | 'dinner' | 'snack'
+
+export const MEAL_TYPES: MealType[] = ['breakfast', 'lunch', 'dinner', 'snack']
+
+/** A logged food. `date` is the user's local calendar day (YYYY-MM-DD). */
+export interface FoodEntry {
+  id: string
+  name: string
+  servingSize: string
+  calories: number
+  protein: number
+  carbs: number
+  fat: number
+  mealType: MealType
+  date: string
+  createdAt: string
+  updatedAt: string
+}
+
+/** Payload accepted by POST /api/entries (numbers arrive from form inputs). */
+export interface FoodEntryInput {
+  name: string
+  servingSize?: string
+  calories: number | string
+  protein?: number | string
+  carbs?: number | string
+  fat?: number | string
+  mealType: MealType
+  date: string
+}
+
+export interface EntryTotals {
+  calories: number
+  protein: number
+  carbs: number
+  fat: number
+  count: number
+}
+
+export interface DayTotals {
+  date: string
+  calories: number
+}
+
 /** Validation/business error codes returned by the API (translated client-side). */
 export type ApiErrorCode =
   | 'NETWORK_ERROR'
@@ -49,6 +104,8 @@ export type ApiErrorCode =
   | 'UNAUTHENTICATED'
   | 'NOT_FOUND'
   | 'SERVER_ERROR'
+  | 'UNKNOWN_ERROR'
+  /* auth fields */
   | 'NAME_REQUIRED'
   | 'NAME_TOO_SHORT'
   | 'NAME_TOO_LONG'
@@ -58,4 +115,24 @@ export type ApiErrorCode =
   | 'PASSWORD_TOO_SHORT'
   | 'PASSWORD_TOO_WEAK'
   | 'PASSWORD_MISMATCH'
-  | 'UNKNOWN_ERROR'
+  /* food entries */
+  | 'FOOD_NAME_REQUIRED'
+  | 'FOOD_NAME_TOO_LONG'
+  | 'SERVING_TOO_LONG'
+  | 'CALORIES_REQUIRED'
+  | 'CALORIES_INVALID'
+  | 'CALORIES_RANGE'
+  | 'MACRO_INVALID'
+  | 'MACRO_RANGE'
+  | 'MEAL_TYPE_REQUIRED'
+  | 'MEAL_TYPE_INVALID'
+  | 'DATE_REQUIRED'
+  | 'DATE_INVALID'
+  | 'DATE_IN_FUTURE'
+  | 'DATE_TOO_OLD'
+  | 'ENTRY_NOT_FOUND'
+  | 'ENTRY_LIMIT_REACHED'
+  /* goals */
+  | 'GOAL_REQUIRED'
+  | 'GOAL_INVALID'
+  | 'GOAL_RANGE'

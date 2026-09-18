@@ -7,7 +7,7 @@ export function ProgressPage() {
       titleKey="pages.progress.title"
       subtitleKey="pages.progress.subtitle"
       icon={<TrendIcon size={30} />}
-      upcoming={['dashboard.week.title', 'dashboard.streak.title', 'dashboard.quick.weighIn']}
+      upcoming={['roadmap.weight', 'roadmap.reports', 'roadmap.workouts']}
     />
   )
 }

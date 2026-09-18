@@ -1,7 +1,7 @@
-import { MoonIcon, PaletteIcon, SunIcon, GlobeIcon, CheckIcon, UserIcon, InfoIcon } from '@/components/ui/Icons'
+import { GoalsCard } from '@/components/settings/GoalsCard'
+import { MoonIcon, PaletteIcon, SunIcon, GlobeIcon, CheckIcon, InfoIcon } from '@/components/ui/Icons'
 import { useTheme } from '@/lib/theme'
 import { useAuth } from '@/lib/auth'
-import { useComingSoon } from '@/hooks/useComingSoon'
 import { useI18n } from '@/i18n'
 
 /**
@@ -12,7 +12,6 @@ export function SettingsPage() {
   const { t, locales, locale, setLocale, meta } = useI18n()
   const { palette, mode, palettes, setPalette, setMode } = useTheme()
   const { user } = useAuth()
-  const comingSoon = useComingSoon()
 
   return (
     <div className="page">
@@ -141,27 +140,8 @@ export function SettingsPage() {
           </p>
         </section>
 
-        {/* --------------------------------------------------- profile -- */}
-        <section className="card card--pad">
-          <div className="row" style={{ gap: 'var(--space-3)', marginBottom: 'var(--space-4)' }}>
-            <span className="stat__icon stat__icon--tint" aria-hidden="true">
-              <UserIcon size={19} />
-            </span>
-            <div>
-              <h2 className="card__title">{t('settings.profile.title')}</h2>
-              <p className="card__subtitle">{t('settings.profile.body')}</p>
-            </div>
-          </div>
-
-          <div className="placeholder">
-            <InfoIcon size={18} />
-            {t('common.comingSoon')}
-          </div>
-
-          <button type="button" className="btn btn--outline btn--block" style={{ marginTop: 'var(--space-4)' }} onClick={comingSoon}>
-            {t('actions.retry')}
-          </button>
-        </section>
+        {/* ------------------------------------------------------ goals -- */}
+        <GoalsCard />
 
         {/* ----------------------------------------------------- about -- */}
         <section className="card card--pad">

@@ -7,7 +7,7 @@ export function DiaryPage() {
       titleKey="pages.diary.title"
       subtitleKey="pages.diary.subtitle"
       icon={<DiaryIcon size={30} />}
-      upcoming={['dashboard.meals.title', 'dashboard.water.title', 'dashboard.macros.title']}
+      upcoming={['roadmap.diary', 'roadmap.reports', 'roadmap.reminders']}
     />
   )
 }

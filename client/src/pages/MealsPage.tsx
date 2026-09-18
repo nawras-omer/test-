@@ -7,7 +7,7 @@ export function MealsPage() {
       titleKey="pages.meals.title"
       subtitleKey="pages.meals.subtitle"
       icon={<MealIcon size={30} />}
-      upcoming={['dashboard.quick.recipe', 'dashboard.quick.scan', 'actions.addMeal']}
+      upcoming={['roadmap.recipes', 'roadmap.barcode', 'roadmap.photos']}
     />
   )
 }

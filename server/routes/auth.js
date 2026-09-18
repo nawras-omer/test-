@@ -6,9 +6,11 @@ import {
   MIN_PASSWORD_LENGTH,
   normaliseEmail,
   sanitisePreferences,
+  validateGoals,
   validateLogin,
   validateSignup,
 } from '../lib/validate.js'
+import { DEFAULT_GOALS, DEFAULT_PREFERENCES } from '../lib/store.js'
 
 const router = express.Router()
 
@@ -72,8 +74,10 @@ router.post('/signup', rateLimit, async (req, res, next) => {
       name: value.name,
       email: value.email,
       passwordHash: await hashPassword(value.password),
-      // Sensible defaults: English + the clean green palette, light mode.
-      preferences: { language: 'en', palette: 'green', colorMode: 'light' },
+      // Sensible defaults: English + the clean green palette, light mode, and
+      // goals the dashboard can measure against until the user edits them.
+      preferences: { ...DEFAULT_PREFERENCES },
+      goals: { ...DEFAULT_GOALS },
       createdAt: now,
       updatedAt: now,
     }
@@ -117,6 +121,20 @@ router.get('/me', requireAuth, (req, res) => {
  *  so cookie-based sessions can be added without touching the UI. */
 router.post('/logout', (req, res) => {
   res.json({ ok: true })
+})
+
+/** Persists the daily targets used by the dashboard. */
+router.patch('/goals', requireAuth, async (req, res, next) => {
+  try {
+    const { ok, errors, value } = validateGoals(req.body ?? {})
+    if (!ok) return fail(res, 422, 'VALIDATION_FAILED', errors)
+    if (Object.keys(value).length === 0) return fail(res, 422, 'VALIDATION_FAILED', {})
+
+    const updated = await db.updateUser(req.user.id, { goals: { ...req.user.goals, ...value } })
+    res.json({ user: publicUser(updated) })
+  } catch (err) {
+    next(err)
+  }
 })
 
 /** Persists the language / palette / colour-mode a signed-in user picked. */

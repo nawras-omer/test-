@@ -10,6 +10,8 @@ export interface FieldProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 
   icon?: ReactNode
   /** Trailing adornment rendered inside the control (e.g. a password toggle). */
   trailing?: ReactNode
+  /** Non-interactive unit label on the trailing edge (kcal, g, …). */
+  suffix?: ReactNode
   optionalLabel?: string
 }
 
@@ -20,6 +22,7 @@ export function Field({
   hint,
   icon,
   trailing,
+  suffix,
   optionalLabel,
   className,
   ...inputProps
@@ -39,7 +42,13 @@ export function Field({
         {icon ? <span className="input-wrap__icon">{icon}</span> : null}
         <input
           id={id}
-          className={['input', icon ? 'input--with-icon' : '', error ? 'input--error' : '', className ?? '']
+          className={[
+            'input',
+            icon ? 'input--with-icon' : '',
+            suffix || trailing ? 'input--with-action' : '',
+            error ? 'input--error' : '',
+            className ?? '',
+          ]
             .filter(Boolean)
             .join(' ')}
           aria-invalid={error ? true : undefined}
@@ -47,6 +56,7 @@ export function Field({
           {...inputProps}
         />
         {trailing}
+        {suffix}
       </div>
 
       {error ? (

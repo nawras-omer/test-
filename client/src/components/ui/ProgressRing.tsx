@@ -7,6 +7,8 @@ interface ProgressRingProps {
   stroke?: number
   children?: ReactNode
   label?: string
+  /** Colours the arc with the danger tone once the goal is exceeded. */
+  over?: boolean
 }
 
 /**
@@ -14,7 +16,7 @@ interface ProgressRingProps {
  * Uses stroke-dasharray on a rotated circle — direction-agnostic, so it renders
  * identically in LTR and RTL.
  */
-export function ProgressRing({ value, max, stroke = 14, children, label }: ProgressRingProps) {
+export function ProgressRing({ value, max, stroke = 14, children, label, over = false }: ProgressRingProps) {
   const size = 200
   const radius = (size - stroke) / 2
   const circumference = 2 * Math.PI * radius
@@ -22,7 +24,7 @@ export function ProgressRing({ value, max, stroke = 14, children, label }: Progr
   const dashoffset = circumference * (1 - ratio)
 
   return (
-    <div className="ring" role="img" aria-label={label}>
+    <div className={`ring${over ? ' ring--over' : ''}`} role="img" aria-label={label}>
       <svg className="ring__svg" viewBox={`0 0 ${size} ${size}`}>
         <circle className="ring__track" cx={size / 2} cy={size / 2} r={radius} />
         <circle

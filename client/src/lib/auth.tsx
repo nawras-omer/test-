@@ -21,7 +21,7 @@ import { ApiError, authApi, getStoredToken, setStoredToken } from './api'
 import { useTheme } from './theme'
 import { useI18n } from '@/i18n'
 import { useToast } from '@/components/ui/Toast'
-import type { LoginInput, SignupInput, User, UserPreferences } from '@/types'
+import type { LoginInput, SignupInput, User, UserGoals, UserPreferences } from '@/types'
 
 type AuthStatus = 'loading' | 'authenticated' | 'anonymous'
 
@@ -33,6 +33,7 @@ interface AuthContextValue {
   signup: (input: SignupInput, remember?: boolean) => Promise<User>
   logout: () => Promise<void>
   updatePreferences: (preferences: Partial<UserPreferences>) => void
+  updateGoals: (goals: Partial<UserGoals>) => Promise<void>
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null)
@@ -143,6 +144,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     push(t('auth.signedOut'))
   }, [push, t])
 
+  const updateGoals = useCallback(
+    async (goals: Partial<UserGoals>) => {
+      const { user: updated } = await authApi.updateGoals(goals)
+      setUser(updated)
+      push(t('settings.goals.saved'), 'success')
+    },
+    [push, t],
+  )
+
   const updatePreferences = useCallback(
     (preferences: Partial<UserPreferences>) => {
       if (preferences.language) setLocale(preferences.language)
@@ -161,8 +171,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       signup,
       logout,
       updatePreferences,
+      updateGoals,
     }),
-    [status, user, login, signup, logout, updatePreferences],
+    [status, user, login, signup, logout, updatePreferences, updateGoals],
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

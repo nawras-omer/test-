@@ -8,9 +8,12 @@
 import type {
   ApiErrorCode,
   AuthResponse,
+  FoodEntry,
+  FoodEntryInput,
   LoginInput,
   SignupInput,
   User,
+  UserGoals,
   UserPreferences,
 } from '@/types'
 
@@ -108,6 +111,22 @@ function fallbackCode(status: number): ApiErrorCode {
   return 'UNKNOWN_ERROR'
 }
 
+/** Query for the diary list endpoints. */
+export interface EntryQuery {
+  from?: string
+  to?: string
+  limit?: number
+}
+
+function entryQueryString(query: EntryQuery): string {
+  const params = new URLSearchParams()
+  if (query.from) params.set('from', query.from)
+  if (query.to) params.set('to', query.to)
+  if (query.limit !== undefined) params.set('limit', String(query.limit))
+  const search = params.toString()
+  return search ? `?${search}` : ''
+}
+
 export const authApi = {
   signup: (input: SignupInput) => request<AuthResponse>('/auth/signup', { method: 'POST', body: input }),
 
@@ -118,5 +137,23 @@ export const authApi = {
   updatePreferences: (preferences: Partial<UserPreferences>) =>
     request<{ user: User }>('/auth/preferences', { method: 'PATCH', auth: true, body: preferences }),
 
+  updateGoals: (goals: Partial<UserGoals>) =>
+    request<{ user: User }>('/auth/goals', { method: 'PATCH', auth: true, body: goals }),
+
   logout: () => request<{ ok: boolean }>('/auth/logout', { method: 'POST' }).catch(() => ({ ok: true })),
+}
+
+/** Food-log endpoints. All scoped to the signed-in user by the server. */
+export const entriesApi = {
+  list: (query: EntryQuery = {}, signal?: AbortSignal) =>
+    request<{ entries: FoodEntry[] }>(`/entries${entryQueryString(query)}`, { auth: true, signal }),
+
+  /** Most recent entries regardless of date — powers the dashboard "recent" list. */
+  recent: (limit: number, signal?: AbortSignal) =>
+    request<{ entries: FoodEntry[] }>(`/entries${entryQueryString({ limit })}`, { auth: true, signal }),
+
+  create: (input: FoodEntryInput) =>
+    request<{ entry: FoodEntry }>('/entries', { method: 'POST', auth: true, body: input }),
+
+  remove: (id: string) => request<{ ok: boolean; id: string }>(`/entries/${id}`, { method: 'DELETE', auth: true }),
 }
