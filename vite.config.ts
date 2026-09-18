@@ -42,5 +42,9 @@ export default defineConfig({
     outDir: '../dist',
     emptyOutDir: true,
     sourcemap: false,
+    // The bundled food database (1,000+ foods × 3 languages) is deliberately
+    // shipped in the main chunk so search is instant and works offline — which
+    // pushes the entry chunk past Vite's default 500 kB advisory.
+    chunkSizeWarningLimit: 700,
   },
 })

@@ -191,6 +191,48 @@ export function validateFoodEntry(input = {}) {
   return { ok: Object.keys(errors).length === 0, errors, value }
 }
 
+/* ---------------------------------------------------------- custom foods -- */
+
+export const MAX_CUSTOM_FOODS = 300
+
+/**
+ * Validates a personal-library food. Same field rules as a diary entry (minus
+ * meal/date), because a custom food is essentially the entry form's nutrition
+ * block saved for reuse.
+ */
+export function validateCustomFood(input = {}) {
+  const errors = {}
+  const value = {}
+
+  const name = String(input.name ?? '').trim()
+  if (!name) errors.name = 'FOOD_NAME_REQUIRED'
+  else if (name.length > MAX_FOOD_NAME_LENGTH) errors.name = 'FOOD_NAME_TOO_LONG'
+  else value.name = name
+
+  const servingSize = String(input.servingSize ?? '').trim()
+  if (servingSize.length > MAX_SERVING_LENGTH) errors.servingSize = 'SERVING_TOO_LONG'
+  else value.servingSize = servingSize
+
+  const calories = toNumber(input.calories)
+  if (calories === null) errors.calories = 'CALORIES_REQUIRED'
+  else if (Number.isNaN(calories)) errors.calories = 'CALORIES_INVALID'
+  else if (calories < 0 || calories > MAX_CALORIES) errors.calories = 'CALORIES_RANGE'
+  else value.calories = Math.round(calories)
+
+  for (const macro of ['protein', 'carbs', 'fat']) {
+    const amount = toNumber(input[macro])
+    if (amount === null) {
+      value[macro] = 0
+      continue
+    }
+    if (Number.isNaN(amount)) errors[macro] = 'MACRO_INVALID'
+    else if (amount < 0 || amount > MAX_MACRO_GRAMS) errors[macro] = 'MACRO_RANGE'
+    else value[macro] = Math.round(amount * 10) / 10
+  }
+
+  return { ok: Object.keys(errors).length === 0, errors, value }
+}
+
 /** Query-string window for GET /api/entries (both bounds optional). */
 export function validateEntryQuery({ from, to, limit } = {}) {
   const errors = {}

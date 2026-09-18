@@ -13,6 +13,7 @@ import { MemoryRouter } from 'react-router-dom'
 import { App } from '@/App'
 import { ErrorBoundary } from '@/components/ErrorBoundary'
 import { EntriesProvider } from '@/lib/entries'
+import { CustomFoodsProvider } from '@/lib/customFoods'
 import { FoodLogProvider } from '@/components/food/FoodLogProvider'
 import { ToastProvider } from '@/components/ui/Toast'
 import { AuthProvider } from '@/lib/auth'
@@ -33,13 +34,15 @@ export function mount(container: HTMLElement, initialPath: string): Root {
           <ToastProvider>
             <AuthProvider>
               <EntriesProvider>
-                <FoodLogProvider>
+                <CustomFoodsProvider>
+                  <FoodLogProvider>
                   <MemoryRouter initialEntries={[initialPath]}>
                     <ErrorBoundary>
                       <App />
                     </ErrorBoundary>
                   </MemoryRouter>
-                </FoodLogProvider>
+                  </FoodLogProvider>
+                </CustomFoodsProvider>
               </EntriesProvider>
             </AuthProvider>
           </ToastProvider>

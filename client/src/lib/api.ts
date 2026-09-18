@@ -8,6 +8,8 @@
 import type {
   ApiErrorCode,
   AuthResponse,
+  CustomFood,
+  CustomFoodInput,
   FoodEntry,
   FoodEntryInput,
   LoginInput,
@@ -156,4 +158,17 @@ export const entriesApi = {
     request<{ entry: FoodEntry }>('/entries', { method: 'POST', auth: true, body: input }),
 
   remove: (id: string) => request<{ ok: boolean; id: string }>(`/entries/${id}`, { method: 'DELETE', auth: true }),
+}
+
+/**
+ * Personal food library. The bundled 1,000+ food database ships with the client;
+ * this endpoint only stores the foods a user creates themselves.
+ */
+export const foodsApi = {
+  list: (signal?: AbortSignal) => request<{ foods: CustomFood[] }>('/foods', { auth: true, signal }),
+
+  create: (input: CustomFoodInput) =>
+    request<{ food: CustomFood }>('/foods', { method: 'POST', auth: true, body: input }),
+
+  remove: (id: string) => request<{ ok: boolean; id: string }>(`/foods/${id}`, { method: 'DELETE', auth: true }),
 }

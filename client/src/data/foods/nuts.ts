@@ -1,0 +1,32 @@
+import type { FoodRow } from './types'
+
+/** Nuts, seeds and nut butters. Per 100 g. */
+export const nuts: FoodRow[] = [
+  ['almonds', 'Almonds', 'لوز', 'بادەم', 1, 'cup', 143, 579, 21.2, 21.6, 49.9],
+  ['almonds-roasted', 'Almonds, roasted salted', 'لوز محمص مملح', 'بادەمی برژاوی سوێر', 1, 'cup', 138, 596, 21, 20, 52],
+  ['almond-butter', 'Almond butter', 'زبدة اللوز', 'کەرەی بادەم', 1, 'tbsp', 16, 614, 20.8, 18.8, 55.5],
+  ['walnuts', 'Walnuts', 'جوز', 'گوێزی', 1, 'cup', 117, 654, 15.2, 13.7, 65.2],
+  ['cashews', 'Cashews', 'كاجو', 'کاجوو', 1, 'cup', 137, 553, 18.2, 30.2, 43.8],
+  ['cashew-butter', 'Cashew butter', 'زبدة الكاجو', 'کەرەی کاجوو', 1, 'tbsp', 16, 587, 17, 28, 49],
+  ['pistachios', 'Pistachios', 'فستق', 'فستق', 1, 'cup', 123, 560, 20.2, 27.2, 45.3],
+  ['pecans', 'Pecans', 'جوز البقان', 'پێکان', 1, 'cup', 109, 691, 9.2, 13.9, 72],
+  ['hazelnuts', 'Hazelnuts', 'بندق', 'فندق', 1, 'cup', 135, 628, 15, 16.7, 60.8],
+  ['macadamia', 'Macadamia nuts', 'جوز المكاديميا', 'ماکادامیا', 1, 'cup', 134, 718, 7.9, 13.8, 75.8],
+  ['brazil-nuts', 'Brazil nuts', 'جوز البرازيل', 'گوێزی بەڕازیل', 1, 'cup', 133, 659, 14.3, 11.7, 67.1],
+  ['pine-nuts', 'Pine nuts', 'صنوبر', 'چەواڵە', 1, 'cup', 135, 673, 13.7, 13.1, 68.4],
+  ['peanuts', 'Peanuts', 'فول سوداني', 'قەرەچە', 1, 'cup', 146, 567, 25.8, 16.1, 49.2],
+  ['peanuts-roasted', 'Peanuts, roasted salted', 'فول سوداني محمص', 'قەرەچەی برژاوی سوێر', 1, 'cup', 146, 587, 24, 21, 50],
+  ['peanut-butter', 'Peanut butter, creamy', 'زبدة الفول السوداني', 'کەرەی قەرەچە', 1, 'tbsp', 16, 588, 25, 20, 50],
+  ['peanut-butter-crunchy', 'Peanut butter, crunchy', 'زبدة الفول السوداني الخشنة', 'کەرەی قەرەچەی دڕ', 1, 'tbsp', 16, 588, 24, 20, 50],
+  ['chestnuts-roasted', 'Chestnuts, roasted', 'كستناء مشوي', 'شاھبەلوت', 1, 'cup', 143, 245, 3.2, 53, 2.2],
+  ['sunflower-seeds', 'Sunflower seeds', 'بذور عباد الشمس', 'تۆوی گوڵەبەرۆژ', 1, 'cup', 140, 584, 20.8, 20, 51.5],
+  ['pumpkin-seeds', 'Pumpkin seeds', 'بذور اليقطين', 'تۆوی کەلەرمە', 1, 'cup', 129, 559, 30.2, 10.7, 49],
+  ['sesame-seeds', 'Sesame seeds', 'بذور السمسم', 'کونجی', 1, 'cup', 144, 573, 17.7, 23.4, 49.7],
+  ['flax-seeds', 'Flax seeds', 'بذور الكتان', 'تۆوی کەتان', 1, 'cup', 168, 534, 18.3, 28.9, 42.2],
+  ['chia-seeds', 'Chia seeds', 'بذور الشيا', 'تۆوی چیا', 1, 'tbsp', 12, 486, 16.5, 42.1, 30.7],
+  ['hemp-seeds', 'Hemp seeds', 'بذور القنب', 'تۆوی هەمپ', 1, 'cup', 160, 553, 31.6, 8.7, 48.8],
+  ['poppy-seeds', 'Poppy seeds', 'بذور الخشخاش', 'تۆوی خەشخاش', 1, 'cup', 144, 525, 17.9, 28.1, 41.6],
+  ['watermelon-seeds', 'Watermelon seeds', 'بذور البطيخ', 'تۆوی زەبەش', 1, 'cup', 108, 557, 28.3, 15.3, 47.4],
+  ['mixed-nuts', 'Mixed nuts', 'مكسرات مشكلة', 'گوێزی تێکەڵکراو', 1, 'cup', 137, 607, 20, 21, 54],
+  ['chestnut-flour', 'Chestnut flour', 'طحين الكستناء', 'ئاردی شاھبەلوت', 1, 'cup', 120, 359, 6.4, 78, 3.4],
+]

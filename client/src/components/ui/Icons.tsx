@@ -368,6 +368,15 @@ export function BookmarkIcon(props: IconProps) {
   )
 }
 
+export function SearchIcon(props: IconProps) {
+  return (
+    <Svg {...props}>
+      <circle cx="11" cy="11" r="6.2" />
+      <path d="M15.6 15.6 20 20" />
+    </Svg>
+  )
+}
+
 export function SparkleIcon(props: IconProps) {
   return (
     <Svg {...props}>

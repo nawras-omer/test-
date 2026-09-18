@@ -34,5 +34,6 @@ Thumbs.db
 coverage/
 .vite/
 
-# smoke-test harness build
+# test harness / data-check build output
 .smoke/
+.data-check/

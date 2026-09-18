@@ -81,6 +81,39 @@ export interface FoodEntryInput {
   date: string
 }
 
+/** A food the user created and saved to their personal library. */
+export interface CustomFood {
+  id: string
+  name: string
+  servingSize: string
+  calories: number
+  protein: number
+  carbs: number
+  fat: number
+  createdAt: string
+  updatedAt: string
+}
+
+/** Values that pre-populate the food-logging dialog, e.g. from the library. */
+export interface FoodLogPrefill {
+  name: string
+  servingSize?: string
+  calories?: number | string
+  protein?: number | string
+  carbs?: number | string
+  fat?: number | string
+}
+
+/** Payload accepted by POST /api/foods. */
+export interface CustomFoodInput {
+  name: string
+  servingSize?: string
+  calories: number | string
+  protein?: number | string
+  carbs?: number | string
+  fat?: number | string
+}
+
 export interface EntryTotals {
   calories: number
   protein: number
@@ -132,6 +165,10 @@ export type ApiErrorCode =
   | 'DATE_TOO_OLD'
   | 'ENTRY_NOT_FOUND'
   | 'ENTRY_LIMIT_REACHED'
+  /* custom foods */
+  | 'CUSTOM_FOOD_DUPLICATE'
+  | 'CUSTOM_FOOD_LIMIT_REACHED'
+  | 'CUSTOM_FOOD_NOT_FOUND'
   /* goals */
   | 'GOAL_REQUIRED'
   | 'GOAL_INVALID'

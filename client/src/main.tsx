@@ -6,6 +6,7 @@ import { ErrorBoundary } from './components/ErrorBoundary'
 import { ToastProvider } from './components/ui/Toast'
 import { AuthProvider } from './lib/auth'
 import { EntriesProvider } from './lib/entries'
+import { CustomFoodsProvider } from './lib/customFoods'
 import { FoodLogProvider } from './components/food/FoodLogProvider'
 import { ThemeProvider } from './lib/theme'
 import { I18nProvider } from './i18n'
@@ -30,13 +31,15 @@ createRoot(container).render(
             {/* Diary state + the single food-logging dialog sit just below auth so
                 every screen shares the same live data. */}
             <EntriesProvider>
-              <FoodLogProvider>
-                <BrowserRouter>
-                  <ErrorBoundary>
-                    <App />
-                  </ErrorBoundary>
-                </BrowserRouter>
-              </FoodLogProvider>
+              <CustomFoodsProvider>
+                <FoodLogProvider>
+                  <BrowserRouter>
+                    <ErrorBoundary>
+                      <App />
+                    </ErrorBoundary>
+                  </BrowserRouter>
+                </FoodLogProvider>
+              </CustomFoodsProvider>
             </EntriesProvider>
           </AuthProvider>
         </ToastProvider>

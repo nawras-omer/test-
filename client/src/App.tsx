@@ -3,6 +3,7 @@ import { AppLayout } from '@/components/layout/AppLayout'
 import { ProtectedRoute, PublicOnlyRoute } from '@/components/routes/RouteGuards'
 import { DashboardPage } from '@/pages/DashboardPage'
 import { DiaryPage } from '@/pages/DiaryPage'
+import { LibraryPage } from '@/pages/LibraryPage'
 import { LoginPage } from '@/pages/LoginPage'
 import { MealsPage } from '@/pages/MealsPage'
 import { NotFoundPage } from '@/pages/NotFoundPage'
@@ -14,7 +15,7 @@ import { SignupPage } from '@/pages/SignupPage'
 /**
  * Route map
  *   public   /login · /signup      (redirect away when already signed in)
- *   private  / · /diary · /meals · /progress · /settings · /profile
+ *   private  / · /library · /diary · /meals · /progress · /settings · /profile
  *   fallback *                     (inside the app shell)
  */
 export function App() {
@@ -28,6 +29,7 @@ export function App() {
       <Route element={<ProtectedRoute />}>
         <Route element={<AppLayout />}>
           <Route index element={<DashboardPage />} />
+          <Route path="library" element={<LibraryPage />} />
           <Route path="diary" element={<DiaryPage />} />
           <Route path="meals" element={<MealsPage />} />
           <Route path="progress" element={<ProgressPage />} />

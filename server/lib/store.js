@@ -18,7 +18,7 @@ const DB_FILE = path.join(DATA_DIR, 'users.json')
 export const DEFAULT_GOALS = { calories: 2150, protein: 140, carbs: 240, fat: 70 }
 export const DEFAULT_PREFERENCES = { language: 'en', palette: 'green', colorMode: 'light' }
 
-const EMPTY_DB = { version: 2, users: [], entries: [] }
+const EMPTY_DB = { version: 3, users: [], entries: [], customFoods: [] }
 
 let cache = null
 let writeChain = Promise.resolve()
@@ -29,6 +29,17 @@ function normaliseUser(user) {
     ...user,
     preferences: { ...DEFAULT_PREFERENCES, ...(user.preferences ?? {}) },
     goals: { ...DEFAULT_GOALS, ...(user.goals ?? {}) },
+  }
+}
+
+/** Personal-library rows: only the fields the UI creates. */
+function normaliseCustomFood(food) {
+  return {
+    servingSize: '',
+    protein: 0,
+    carbs: 0,
+    fat: 0,
+    ...food,
   }
 }
 
@@ -51,6 +62,7 @@ async function load() {
       version: EMPTY_DB.version,
       users: (Array.isArray(parsed.users) ? parsed.users : []).map(normaliseUser),
       entries: (Array.isArray(parsed.entries) ? parsed.entries : []).map(normaliseEntry),
+      customFoods: (Array.isArray(parsed.customFoods) ? parsed.customFoods : []).map(normaliseCustomFood),
     }
   } catch (err) {
     if (err.code !== 'ENOENT') {
@@ -151,6 +163,53 @@ export const db = {
     data.entries.push(normaliseEntry(entry))
     await flush()
     return { ...entry }
+  },
+
+  /* ---------------------------------------------------------- custom foods */
+  /** A user's personal library, newest first. */
+  async listCustomFoods(userId) {
+    const data = await load()
+    return data.customFoods
+      .filter((food) => food.userId === userId)
+      .sort((a, b) => String(b.createdAt).localeCompare(String(a.createdAt)))
+      .map((food) => ({ ...food }))
+  },
+
+  async countCustomFoods(userId) {
+    const data = await load()
+    return data.customFoods.filter((food) => food.userId === userId).length
+  },
+
+  async findCustomFood(userId, id) {
+    const data = await load()
+    const found = data.customFoods.find((food) => food.userId === userId && food.id === id)
+    return found ? { ...found } : null
+  },
+
+  /** Case-insensitive lookup used to reject duplicates in one person's library. */
+  async findCustomFoodByName(userId, name) {
+    const needle = String(name).trim().toLowerCase()
+    const data = await load()
+    const found = data.customFoods.find(
+      (food) => food.userId === userId && String(food.name).trim().toLowerCase() === needle,
+    )
+    return found ? { ...found } : null
+  },
+
+  async createCustomFood(food) {
+    const data = await load()
+    data.customFoods.push(normaliseCustomFood(food))
+    await flush()
+    return { ...food }
+  },
+
+  async deleteCustomFood(userId, id) {
+    const data = await load()
+    const index = data.customFoods.findIndex((food) => food.userId === userId && food.id === id)
+    if (index === -1) return null
+    const [removed] = data.customFoods.splice(index, 1)
+    await flush()
+    return removed
   },
 
   async deleteEntry(userId, id) {

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type FormEvent } from 'react'
+import { useMemo, useState, type FormEvent } from 'react'
 import { Alert } from '@/components/ui/Alert'
 import { Field } from '@/components/ui/Field'
 import { Modal } from '@/components/ui/Modal'
@@ -15,7 +15,7 @@ import { formatDate, formatNumber } from '@/lib/format'
 import { macroCalories, mealTypeForNow, parseDateKey } from '@/lib/food'
 import { validateFoodEntry } from '@/lib/validation'
 import { useI18n } from '@/i18n'
-import { MEAL_TYPES, type MealType } from '@/types'
+import { MEAL_TYPES, type FoodLogPrefill, type MealType } from '@/types'
 
 const MEAL_ICONS: Record<MealType, typeof SunriseIcon> = {
   breakfast: SunriseIcon,
@@ -32,6 +32,8 @@ interface FoodLogModalProps {
   /** Pre-selected meal / date, e.g. when opened from a specific day. */
   defaultMealType?: MealType
   defaultDate?: string
+  /** Food chosen in the library — name, serving and nutrition are filled in. */
+  prefill?: FoodLogPrefill
 }
 
 interface FormValues {
@@ -43,6 +45,20 @@ interface FormValues {
   fat: string
   mealType: MealType
   date: string
+}
+
+/** Formats a library food as form values, leaving the meal/date to the caller. */
+function formFromPrefill(prefill: FoodLogPrefill, mealType: MealType, date: string): FormValues {
+  return {
+    name: prefill.name ?? '',
+    servingSize: prefill.servingSize ?? '',
+    calories: prefill.calories === undefined || prefill.calories === '' ? '' : String(prefill.calories),
+    protein: prefill.protein === undefined || prefill.protein === '' ? '' : String(prefill.protein),
+    carbs: prefill.carbs === undefined || prefill.carbs === '' ? '' : String(prefill.carbs),
+    fat: prefill.fat === undefined || prefill.fat === '' ? '' : String(prefill.fat),
+    mealType,
+    date,
+  }
 }
 
 function emptyForm(mealType: MealType, date: string): FormValues {
@@ -63,26 +79,27 @@ function emptyForm(mealType: MealType, date: string): FormValues {
  * Fully localised and RTL-aware; saving hands the canonical entry back to the
  * diary store, which refreshes every dashboard widget immediately.
  */
-export function FoodLogModal({ open, onClose, onSaved, defaultMealType, defaultDate }: FoodLogModalProps) {
+export function FoodLogModal({
+  open,
+  onClose,
+  onSaved,
+  defaultMealType,
+  defaultDate,
+  prefill,
+}: FoodLogModalProps) {
   const { t, locale } = useI18n()
   const { today, addEntry } = useEntries()
 
-  const [values, setValues] = useState<FormValues>(() =>
-    emptyForm(defaultMealType ?? mealTypeForNow(), defaultDate ?? today),
-  )
+  // The provider remounts this component on every opening (see the `key` it
+  // passes), so the initial state *is* the reset — no effect, no stale frame.
+  const [values, setValues] = useState<FormValues>(() => {
+    const mealType = defaultMealType ?? mealTypeForNow()
+    const date = defaultDate ?? today
+    return prefill ? formFromPrefill(prefill, mealType, date) : emptyForm(mealType, date)
+  })
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [formError, setFormError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
-
-  // Reset to a clean form each time the dialog opens, with the meal guessed
-  // from the clock and the date defaulted to the caller's day.
-  useEffect(() => {
-    if (!open) return
-    setValues(emptyForm(defaultMealType ?? mealTypeForNow(), defaultDate ?? today))
-    setErrors({})
-    setFormError(null)
-    setSubmitting(false)
-  }, [open, defaultMealType, defaultDate, today])
 
   const update =
     (field: keyof FormValues) => (event: { target: { value: string } }) =>

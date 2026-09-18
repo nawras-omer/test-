@@ -29,12 +29,16 @@ async function apiLogin() {
   return (await response.json()).token
 }
 
-/** Wipes the demo account's diary + goals so every run starts from the same state. */
+/** Wipes the demo account's diary, goals and custom foods so every run starts clean. */
 async function resetDemoAccount(token) {
   const auth = { Authorization: `Bearer ${token}` }
   const { entries } = await fetch(`${API}/entries`, { headers: auth }).then((r) => r.json())
   for (const entry of entries) {
     await fetch(`${API}/entries/${entry.id}`, { method: 'DELETE', headers: auth })
+  }
+  const { foods } = await fetch(`${API}/foods`, { headers: auth }).then((r) => r.json())
+  for (const food of foods) {
+    await fetch(`${API}/foods/${food.id}`, { method: 'DELETE', headers: auth })
   }
   await fetch(`${API}/auth/goals`, {
     method: 'PATCH',
@@ -338,6 +342,158 @@ check('goal change is confirmed', await waitForToast('Daily goals updated'), las
 click($$('.nav-link').find((el) => el.textContent.includes('Dashboard')))
 await wait(300)
 check('remaining recalculates against the new goal (1,500)', statValues()[1].startsWith('1,500'), statValues()[1])
+
+/* ---------------------------------------------------------- food library -- */
+
+const goToNav = async (label) => {
+  click($$('.nav-link').find((el) => el.textContent.includes(label)))
+  await wait(320)
+}
+
+const searchLibrary = async (value) => {
+  setValue($('#library-search'), value)
+  await wait(150)
+}
+
+await goToNav('Food library')
+check('library page renders its search box', Boolean($('#library-search')))
+const librarySubtitle = $('.page__subtitle')?.textContent ?? ''
+check('library advertises the whole database (1,110 foods)', /1,110/.test(librarySubtitle), librarySubtitle.slice(0, 160))
+check(
+  'category browsing covers the required five',
+  ['Fruits', 'Vegetables', 'Proteins', 'Grains', 'Snacks'].every((label) =>
+    $$('.category-chip').some((chip) => chip.textContent.includes(label)),
+  ),
+  $$('.category-chip').length + ' chips',
+)
+check('categories include the extra groups too', $$('.category-chip').length === 14, String($$('.category-chip').length))
+
+/* ------------------------------------------- search in three languages -- */
+
+await searchLibrary('chick')
+check(
+  'English search finds chicken',
+  $$('.food-item__name').some((el) => el.textContent.includes('Chicken')),
+  $$('.food-item__name')[0]?.textContent ?? '',
+)
+check('search reports the match count', /\d+ foods/.test($('[data-testid="library-count"]')?.textContent ?? ''))
+
+await searchLibrary('تفاح')
+check(
+  'Arabic query matches while the UI is English',
+  $$('.food-item__name').some((el) => el.textContent.includes('Apple')),
+  $$('.food-item__name')[0]?.textContent ?? '',
+)
+
+await searchLibrary('سێو')
+check(
+  'Sorani query matches too',
+  $$('.food-item__name').some((el) => el.textContent.includes('Apple')),
+  $$('.food-item__name')[0]?.textContent ?? '',
+)
+
+await searchLibrary('بنجر')
+check(
+  'a second Arabic query finds beetroot',
+  $$('.food-item__name').some((el) => el.textContent.includes('Beet')),
+  $$('.food-item__name')[0]?.textContent ?? '',
+)
+
+/* --------------------------------------- click a food → prefill dialog -- */
+
+await searchLibrary('apple')
+const firstFoodName = $$('.food-item__name')[0]?.textContent?.trim() ?? ''
+await $$('.food-item__main')[0].dispatchEvent(new window.MouseEvent('click', { bubbles: true, cancelable: true, view: window }))
+check('clicking a library food opens the log dialog', await waitFor(() => Boolean($('#food-log-form')), 2000))
+const prefilledName = $('[name="name"]')?.value ?? ''
+const prefilledKcal = Number($('[name="calories"]')?.value ?? '0')
+check('the dialog is prefilled with the chosen food', prefilledName === firstFoodName, `${prefilledName} vs ${firstFoodName}`)
+check('the dialog is prefilled with its calories', prefilledKcal > 0, String(prefilledKcal))
+check('the dialog is prefilled with a serving description', ($('[name="servingSize"]')?.value ?? '').length > 2, $('[name="servingSize"]')?.value ?? '')
+check('the dialog is prefilled with macros', Number($('[name="carbs"]')?.value ?? '0') > 0, $('[name="carbs"]')?.value ?? '')
+
+check('the prefilled entry saves', await submitFoodForm())
+check('the success message names the library food', await waitForToast(prefilledName), lastToast())
+
+await goToNav('Dashboard')
+const expectedTotal = (1200 - 300 + prefilledKcal).toLocaleString('en-US')
+check('the logged library food reaches the dashboard', statValues()[0].startsWith(expectedTotal), statValues()[0])
+check('the recent list shows it', $$('.entry__name')[0].textContent.includes(prefilledName))
+click($$('.entry__delete')[0])
+check('cleaning up the library entry works', await waitFor(() => $$('.entry').length === 2))
+check('totals are back to the earlier entries (900)', statValues()[0].startsWith('900'), statValues()[0])
+
+/* ------------------------------------------------ custom food workflow -- */
+
+await goToNav('Food library')
+await searchLibrary('zzqqxx')
+check('no-match state explains the situation', text().includes('No food matches'), text().slice(-160))
+check('the empty state offers a custom food', Boolean(byText('button', 'zzqqxx')))
+click(byText('button', 'zzqqxx'))
+check('the custom form opens', await waitFor(() => Boolean($('#custom-food-form')), 2000))
+check('the custom form is seeded with the query', $('[name="custom-name"]')?.value === 'zzqqxx', $('[name="custom-name"]')?.value ?? '')
+
+$('#custom-food-form').dispatchEvent(new window.Event('submit', { bubbles: true, cancelable: true }))
+await wait(200)
+check('the custom form validates its required fields', $('.modal')?.textContent.includes('Please enter the calories.'), $('.modal')?.textContent?.slice(-120) ?? '')
+
+fill('custom-name', 'Test Bake')
+fill('custom-servingSize', '1 slice')
+fill('custom-calories', '321')
+fill('custom-protein', '12')
+fill('custom-carbs', '40')
+fill('custom-fat', '9')
+$('#custom-food-form').dispatchEvent(new window.Event('submit', { bubbles: true, cancelable: true }))
+check('the custom food is saved', await waitForToast('Test Bake'), lastToast())
+
+const authHeaders = { Authorization: `Bearer ${token}` }
+const storedFoods = await fetch(`${API}/foods`, { headers: authHeaders }).then((r) => r.json())
+check(
+  'the custom food is stored in the personal library',
+  storedFoods.foods.some((food) => food.name === 'Test Bake' && food.calories === 321),
+  JSON.stringify(storedFoods.foods.map((food) => food.name)),
+)
+
+await searchLibrary('test bake')
+check('the custom food is searchable', Boolean(byText('.food-item__name', 'Test Bake')))
+check('the custom food is flagged as custom', Boolean($('.food-item--custom')))
+check('the custom food shows its own nutrition', text().includes('321'), '')
+
+click($('.food-item--custom .food-item__main'))
+check('a custom food prefills the log dialog too', await waitFor(() => Boolean($('#food-log-form')), 2000))
+check('the custom prefill carries the name', $('[name="name"]')?.value === 'Test Bake', $('[name="name"]')?.value ?? '')
+check('the custom prefill carries the calories', $('[name="calories"]')?.value === '321', $('[name="calories"]')?.value ?? '')
+check('the custom prefill carries the serving text', $('[name="servingSize"]')?.value === '1 slice', $('[name="servingSize"]')?.value ?? '')
+click($$('.modal .icon-btn')[0])
+await wait(200)
+check('the dialog closes without logging', !$('#food-log-form'))
+
+await searchLibrary('test bake')
+click($('.food-item--custom .icon-btn--danger'))
+check('removing a custom food is confirmed', await waitForToast('Test Bake was removed'), lastToast())
+check('the custom food disappears from the list', await waitFor(() => !$('.food-item--custom')))
+const afterRemove = await fetch(`${API}/foods`, { headers: authHeaders }).then((r) => r.json())
+check('the removal is persisted', afterRemove.foods.length === 0, JSON.stringify(afterRemove.foods))
+
+/* -------------------------------------------------- library in Arabic -- */
+
+await pickLanguage('العربية')
+await goToNav('مكتبة الأطعمة')
+check('library renders in Arabic + RTL', html().dir === 'rtl' && text().includes('مكتبة الأطعمة'))
+await searchLibrary('دجاج')
+check(
+  'Arabic search works in the Arabic UI',
+  $$('.food-item__name').some((el) => el.textContent.includes('دجاج')),
+  $$('.food-item__name')[0]?.textContent ?? '',
+)
+check('categories are localised', text().includes('فواكه') && text().includes('حلويات'))
+check(
+  'counts use Arabic numerals',
+  /[٠-٩]/.test($('[data-testid="library-count"]')?.textContent ?? ''),
+  $('[data-testid="library-count"]')?.textContent ?? '',
+)
+await pickLanguage('English')
+await wait(200)
 
 /* ------------------------------------------------------- guard + sign out -- */
 

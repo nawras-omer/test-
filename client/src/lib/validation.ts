@@ -102,3 +102,47 @@ export function validateFoodEntry(values: FoodEntryFormValues, todayIso = todayK
 
   return errors
 }
+
+/* ----------------------------------------------------------- custom foods */
+
+export interface CustomFoodFormValues {
+  name: string
+  servingSize: string
+  calories: string
+  protein: string
+  carbs: string
+  fat: string
+}
+
+/**
+ * The personal-library form. Identical rules to `validateFoodEntry` minus meal
+ * and date — a custom food is the nutrition block saved for reuse.
+ */
+export function validateCustomFood(values: CustomFoodFormValues): FieldErrors {
+  const errors: FieldErrors = {}
+
+  const name = values.name.trim()
+  if (!name) errors.name = 'FOOD_NAME_REQUIRED'
+  else if (name.length > MAX_FOOD_NAME_LENGTH) errors.name = 'FOOD_NAME_TOO_LONG'
+
+  if (values.servingSize.trim().length > MAX_SERVING_LENGTH) errors.servingSize = 'SERVING_TOO_LONG'
+
+  const caloriesRaw = values.calories.trim()
+  if (!caloriesRaw) {
+    errors.calories = 'CALORIES_REQUIRED'
+  } else {
+    const calories = Number(caloriesRaw)
+    if (!Number.isFinite(calories)) errors.calories = 'CALORIES_INVALID'
+    else if (calories < 0 || calories > MAX_CALORIES) errors.calories = 'CALORIES_RANGE'
+  }
+
+  for (const macro of ['protein', 'carbs', 'fat'] as const) {
+    const raw = values[macro].trim()
+    if (!raw) continue
+    const amount = Number(raw)
+    if (!Number.isFinite(amount)) errors[macro] = 'MACRO_INVALID'
+    else if (amount < 0 || amount > MAX_MACRO_GRAMS) errors[macro] = 'MACRO_RANGE'
+  }
+
+  return errors
+}

@@ -12,8 +12,9 @@
     "preview": "concurrently -k -n api,web -c magenta,cyan \"npm:dev:api\" \"vite preview\"",
     "start": "node server/index.js",
     "typecheck": "tsc -b",
+    "test:data": "node tests/foods.mjs",
     "test:smoke": "vite build --ssr src/dev/SmokeHarness.tsx --outDir ../.smoke --emptyOutDir --logLevel warn && node tests/smoke.mjs",
-    "test": "npm run typecheck && npm run test:smoke"
+    "test": "npm run typecheck && npm run test:data && npm run test:smoke"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",

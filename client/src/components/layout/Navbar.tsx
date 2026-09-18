@@ -4,7 +4,7 @@ import { LanguageSwitcher } from './LanguageSwitcher'
 import { ThemeSwitcher } from './ThemeSwitcher'
 import { UserMenu } from './UserMenu'
 import { Logo } from '@/components/ui/Logo'
-import { CloseIcon, DiaryIcon, HomeIcon, MealIcon, MenuIcon, TrendIcon } from '@/components/ui/Icons'
+import { BookmarkIcon, CloseIcon, DiaryIcon, HomeIcon, MealIcon, MenuIcon, TrendIcon } from '@/components/ui/Icons'
 import { useAuth } from '@/lib/auth'
 import { cx } from '@/lib/utils'
 import { useI18n, type TranslationKey } from '@/i18n'
@@ -18,6 +18,7 @@ interface NavItem {
 
 const NAV_ITEMS: NavItem[] = [
   { to: '/', key: 'nav.dashboard', icon: HomeIcon, end: true },
+  { to: '/library', key: 'nav.library', icon: BookmarkIcon },
   { to: '/diary', key: 'nav.diary', icon: DiaryIcon },
   { to: '/meals', key: 'nav.meals', icon: MealIcon },
   { to: '/progress', key: 'nav.progress', icon: TrendIcon },

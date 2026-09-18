@@ -3,11 +3,13 @@ import { createContext, useCallback, useContext, useMemo, useState, type ReactNo
 import { FoodLogModal } from './FoodLogModal'
 import { useToast } from '@/components/ui/Toast'
 import { useI18n } from '@/i18n'
-import type { MealType } from '@/types'
+import type { FoodLogPrefill, MealType } from '@/types'
 
 interface OpenOptions {
   mealType?: MealType
   date?: string
+  /** Values copied in from the food library (name, serving, nutrition). */
+  prefill?: FoodLogPrefill
 }
 
 interface FoodLogContextValue {
@@ -37,14 +39,24 @@ export function FoodLogProvider({ children }: { children: ReactNode }) {
     [openFoodLog, closeFoodLog, options],
   )
 
+  // A fresh key per opening remounts the dialog, so its form state is built
+  // once, during the first render — the dialog can never flash the previous
+  // entry's values before an effect resets them.
+  const modalKey =
+    options === null
+      ? 'closed'
+      : `${options.mealType ?? ''}|${options.date ?? ''}|${JSON.stringify(options.prefill ?? null)}`
+
   return (
     <FoodLogContext.Provider value={value}>
       {children}
       <FoodLogModal
+        key={modalKey}
         open={options !== null}
         onClose={closeFoodLog}
         defaultMealType={options?.mealType}
         defaultDate={options?.date}
+        prefill={options?.prefill}
         onSaved={(name, mealType) =>
           push(t('food.added', { name, meal: t(`meal.${mealType}`) }), 'success')
         }

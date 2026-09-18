@@ -1,12 +1,14 @@
 # Kalori — multilingual calorie tracker
 
 A health-focused calorie tracker with **working authentication**, a **working food log**, a
-**three-language runtime switch** (English · العربية · کوردیی سۆرانی) with full **RTL
-mirroring**, and a **customisable theme system** (4 palettes × light/dark) driven entirely by
-CSS variables.
+**bundled food library of 1,110 foods**, a **three-language runtime switch**
+(English · العربية · کوردیی سۆرانی) with full **RTL mirroring**, and a **customisable theme
+system** (4 palettes × light/dark) driven entirely by CSS variables.
 
 Log a food and everything on the dashboard updates immediately: calories consumed, calories
 remaining, macro bars, the meal breakdown, the seven-day chart and the recent-entries list.
+Search the library in any of the three languages and one click pre-fills the logging dialog;
+if a food is missing, add it once and it is saved to your own library.
 
 ---
 
@@ -35,7 +37,9 @@ Or create a new account from `/signup` — new accounts start with a 2,150 kcal 
 | `npm run preview`    | Serve the built client + API locally                                |
 | `npm start`          | API only (add `SERVE_STATIC=1` to also serve `dist/` from one port) |
 | `npm run typecheck`  | Type-check only                                                     |
+| `npm run test:data`  | Food-database integrity checks (offline, no server needed)          |
 | `npm run test:smoke` | Headless UI smoke test (needs `npm run dev` running)                |
+| `npm test`           | All three, in that order                                            |
 
 ---
 
@@ -55,6 +59,25 @@ Or create a new account from `/signup` — new accounts start with a 2,150 kcal 
   summary shows the entry's macros (plus how many kcal they account for).
 - Validation runs client-side *and* server-side with the same error codes, and the messages
   are translated, so the same field shows the same sentence in all three languages.
+
+### Food library
+
+- **1,110 foods** ship with the client in
+  [`client/src/data/foods/`](client/src/data/foods/) — 12 categories (fruits, vegetables,
+  proteins, grains, dairy, legumes, nuts, fats, snacks, sweets, beverages, prepared), each food
+  with a serving size and per-100 g calories, protein, carbs and fat.
+- **Every food is named in English, Arabic and Sorani Kurdish**, and search matches all three at
+  once — type `chick`, `تفاح` or `سێو` and you get the same food. Text is normalised first
+  (diacritics, alef/yeh/kaf variants, punctuation), so spelling differences do not matter.
+- **Search is instant and offline** (no network hop — the database is in the bundle) and ranked:
+  exact name, then prefix, then synonyms, then anything in the haystack.
+- **Clicking a food pre-fills the logging dialog** with its name, serving description, calories
+  and macros — only the meal and date are left to choose. The name is written in the language
+  you are logging in.
+- **Nothing found? Add your own.** The custom-food form (name, serving size, calories, protein,
+  carbs, fat) saves to your **personal library** via `POST /api/foods` — per account, so it is
+  there on every device — and shows up with a *Custom* badge, searchable and one tap away from
+  the log dialog. Custom foods can be removed again from the same list.
 
 ### Dashboard widgets
 
@@ -111,35 +134,44 @@ server/                     Express API (no framework, no ORM)
   index.js                  app wiring, /api/health, optional static hosting
   routes/auth.js            signup · login · me · logout · preferences · goals
   routes/entries.js         food-log CRUD, scoped to the authenticated user
+  routes/foods.js           personal food library (custom foods), per user
   lib/auth.js               bcrypt + JWT helpers, publicUser() projection
   lib/validate.js           validation returning error *codes*, allow-lists, limits
-  lib/store.js              atomic JSON store (users + entries); swap for Postgres later
+  lib/store.js              atomic JSON store (users + entries + custom foods)
   seed.js                   idempotent demo account
   data/users.json           dev "database" (git-ignored, created on first run)
 
 client/
   index.html                <html lang dir data-palette data-mode> shell + fonts
-  src/main.tsx              provider tree: Theme → I18n → Toast → Auth → Entries → FoodLog
+  src/main.tsx              provider tree: Theme → I18n → Toast → Auth → Entries →
+                            CustomFoods → FoodLog
   src/App.tsx               route map
-  src/types.ts              shared domain types (FoodEntry, UserGoals, ApiErrorCode …)
+  src/types.ts              shared domain types (FoodEntry, CustomFood, UserGoals, ApiErrorCode …)
+  src/data/foods/           the bundled database: types.ts + 12 row files + index.ts
+                            (assembly, normalisation, integrity assertions)
   src/i18n/                 en.ts (key source of truth) · ar.ts · ckb.ts · index.tsx
   src/lib/
     api.ts                  typed fetch wrapper (auth + entries endpoints)
     auth.tsx                session + preferences + goals
     entries.tsx             diary store: 7-day window + recent list, add/remove/refresh
+    customFoods.tsx         the user's personal food library
+    foods.ts                library search/ranking + "prefill the dialog" helpers
     food.ts                 date-key maths, totals, goal maths (pure functions)
     theme.tsx               palettes, colour mode, CSS-variable application
     errors.ts               API error code → translation key
     validation.ts           client mirrors of the server rules
+  src/pages/                DashboardPage · LibraryPage · Settings · Profile · auth screens
   src/components/
     dashboard/              StatCards · CalorieCard · MacroCard · MealBreakdownCard
                             RecentEntriesCard · WeeklyChartCard
     food/                   FoodLogModal · FoodLogProvider (one dialog app-wide)
+                            CustomFoodModal (add to the personal library)
     settings/               GoalsCard
     ui/                     Modal · Field · ProgressRing · Dropdown · Toast · Icons …
     layout/ auth/ routes/   navbar, switchers, guards, auth screens
   src/styles/               tokens.css · base.css · layout.css · components.css
-tests/smoke.mjs             headless end-to-end UI checks (59)
+tests/smoke.mjs             headless end-to-end UI checks (101)
+tests/foods.mjs             food-database integrity checks (10)
 ```
 
 ---
@@ -189,6 +221,9 @@ same code works behind any reverse proxy or preview host).
 | `POST`   | `/api/entries`          | Bearer | create an entry → 201                                    |
 | `GET`    | `/api/entries/:id`      | Bearer | single entry                                             |
 | `DELETE` | `/api/entries/:id`      | Bearer | delete an entry                                          |
+| `GET`    | `/api/foods`            | Bearer | the user's custom foods, newest first                    |
+| `POST`   | `/api/foods`            | Bearer | add a custom food → 201 `{ food }`                       |
+| `DELETE` | `/api/foods/:id`        | Bearer | remove a custom food                                     |
 
 Errors are always `{ "error": { "code": "…", "fields": { "field": "CODE" } } }`.
 
@@ -198,6 +233,8 @@ Entry codes: `FOOD_NAME_REQUIRED`, `FOOD_NAME_TOO_LONG`, `SERVING_TOO_LONG`,
 `CALORIES_REQUIRED`, `CALORIES_INVALID`, `CALORIES_RANGE`, `MACRO_INVALID`, `MACRO_RANGE`,
 `MEAL_TYPE_REQUIRED`, `MEAL_TYPE_INVALID`, `DATE_REQUIRED`, `DATE_INVALID`, `DATE_IN_FUTURE`,
 `DATE_TOO_OLD`, `ENTRY_NOT_FOUND`, `ENTRY_LIMIT_REACHED` (100 entries/day).
+Custom-food codes: `CUSTOM_FOOD_DUPLICATE`, `CUSTOM_FOOD_LIMIT_REACHED` (300 per user),
+`CUSTOM_FOOD_NOT_FOUND`.
 Goal codes: `GOAL_REQUIRED`, `GOAL_INVALID`, `GOAL_RANGE`.
 
 Rules: passwords need 8+ characters with a letter and a digit; entries need a name and
@@ -219,8 +256,19 @@ Copy `.env.example` → `.env` and adjust as needed:
 ## Testing
 
 ```bash
+npm test             # typecheck + data checks + smoke test
+```
+
+`npm run test:data` needs nothing running: it bundles the food database with esbuild and
+asserts ≥ 1,000 foods, unique ids, three script-correct names per food, plausible nutrition,
+serving maths, the required categories and a search haystack that really contains the Arabic
+and Kurdish names.
+
+The smoke test needs the API and web server:
+
+```bash
 npm run dev          # terminal 1
-npm run test:smoke   # terminal 2 — 59 end-to-end checks
+npm run test:smoke   # terminal 2 — 101 end-to-end checks
 ```
 
 The smoke test mounts the real app in jsdom against the live API and asserts the behaviour
@@ -234,6 +282,10 @@ this app promises. It wipes the demo account's diary first, then checks, among o
   breakdown, weekly chart and recent list update**, with the success toast
 - logging in Arabic (Arabic-Indic numerals render correctly), deleting an entry, editing goals
   and seeing "remaining" recalculate
+- the food library: the bundled count, the five required categories, search in **English,
+  Arabic and Sorani** (the Arabic/Kurdish queries run while the UI is in English), clicking a
+  food to pre-fill and save the dialog, and the whole **custom-food round trip** — no-match
+  state, form validation, save, per-user persistence via the API, re-search, pre-fill and delete
 
 No browser download needed.
 
@@ -242,9 +294,10 @@ No browser download needed.
 ## Roadmap (next slices)
 
 1. **Diary view** — day-by-day list with edit, duplicate and copy-yesterday
-2. **Food database** — search, barcode scan, portion editor, saved meals and recipes
+2. **Food database, next** — barcode scanning, a portion/quantity editor and saved meals
 3. **Progress** — weight log, trends, weekly/monthly reports, streaks
 4. **Extras** — water tracking, workouts and calories burned, reminders, PWA
 
-Until those land, `/diary`, `/meals` and `/progress` are honest "coming soon" screens listing
-what is planned; nothing in them is fake data.
+The library already ships with the app, so `GET /api/foods` only ever returns user-created
+foods. Until the remaining slices land, `/diary`, `/meals` and `/progress` are honest "coming
+soon" screens listing what is planned; nothing in them is fake data.
