@@ -121,13 +121,12 @@ export function ThemeProvider({
     root.dataset.palette = state.palette
     root.dataset.mode = state.mode
 
-    // Keep the mobile browser chrome in step with the active palette.
+    // Keep the mobile browser chrome in step with the active palette: read the
+    // resolved background token rather than hard-coding a colour per mode.
     const meta = document.querySelector('meta[name="theme-color"]')
     if (meta) {
-      meta.setAttribute(
-        'content',
-        state.mode === 'dark' ? '#12161a' : '#ffffff',
-      )
+      const background = getComputedStyle(root).getPropertyValue('--bg-elevated').trim()
+      if (background) meta.setAttribute('content', background)
     }
 
     try {

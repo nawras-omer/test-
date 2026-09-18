@@ -13,6 +13,7 @@ export const ckb: Dictionary = {
   'nav.openMenu': 'کردنەوەی لیستی گەشتکردن',
   'nav.closeMenu': 'داخستنی لیستی گەشتکردن',
 
+  'a11y.skipToContent': 'چوون بۆ ناوەڕۆکی سەرەکی',
   'common.soon': 'بەم زووانە',
   'common.comingSoon': 'بەم زووانە',
   'common.placeholderNote': 'وەشانی بنەڕەت — داتای نموونە، هێشتا تۆمارکردن نییە.',

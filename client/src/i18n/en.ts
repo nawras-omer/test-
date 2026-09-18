@@ -17,6 +17,7 @@ export const en = {
   'nav.closeMenu': 'Close navigation menu',
 
   /* ---------------- generic ---------------- */
+  'a11y.skipToContent': 'Skip to main content',
   'common.soon': 'Soon',
   'common.comingSoon': 'Coming soon',
   'common.placeholderNote': 'Foundation build — sample data, no logging yet.',

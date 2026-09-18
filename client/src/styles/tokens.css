@@ -110,7 +110,6 @@
   --text-4xl: clamp(2rem, 1.4rem + 2.4vw, 3rem);
 
   --leading-tight: 1.2;
-  --leading-snug: 1.4;
   --leading-normal: 1.6;
 
   /* space */
@@ -158,9 +157,7 @@
 /* Right-to-left scripts get a typeface designed for Arabic letterforms. */
 :root:is([lang='ar'], [lang='ckb']) {
   --font-sans: 'Noto Kufi Arabic', 'Segoe UI', Tahoma, 'Plus Jakarta Sans', system-ui, sans-serif;
-  --text-base: 0.9375rem;
   --leading-normal: 1.85; /* Arabic script needs more vertical room */
-  --letter-tight: 0;
 }
 
 /* ------------------------------------------------------------------ *
@@ -300,12 +297,4 @@
   --macro-carbs: hsl(var(--accent-h) calc(var(--accent-s) - 6%) 60%);
   --macro-fat: hsl(var(--tint-h) calc(var(--tint-s) - 8%) 62%);
   --macro-water: hsl(200 72% 62%);
-}
-
-/* Keep the browser UI (address bar / form controls) in step with the palette. */
-:root[data-mode='light'] {
-  --meta-theme: hsl(0 0% 100%);
-}
-:root[data-mode='dark'] {
-  --meta-theme: hsl(var(--brand-h) 18% 7.5%);
 }

@@ -29,8 +29,8 @@ interface AuthContextValue {
   status: AuthStatus
   user: User | null
   isAuthenticated: boolean
-  login: (input: LoginInput) => Promise<User>
-  signup: (input: SignupInput) => Promise<User>
+  login: (input: LoginInput, remember?: boolean) => Promise<User>
+  signup: (input: SignupInput, remember?: boolean) => Promise<User>
   logout: () => Promise<void>
   updatePreferences: (preferences: Partial<UserPreferences>) => void
 }
@@ -107,8 +107,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   /* ---------------- actions ---------------- */
   const startSession = useCallback(
-    (nextUser: User, token: string, message: string) => {
-      setStoredToken(token)
+    (nextUser: User, token: string, message: string, remember: boolean) => {
+      setStoredToken(token, remember)
       setUser(nextUser)
       applyUserPreferences(nextUser)
       setStatus('authenticated')
@@ -118,18 +118,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   )
 
   const login = useCallback(
-    async (input: LoginInput) => {
+    async (input: LoginInput, remember = true) => {
       const { token, user: nextUser } = await authApi.login(input)
-      startSession(nextUser, token, t('auth.welcomeBack', { name: nextUser.name.split(' ')[0] }))
+      startSession(nextUser, token, t('auth.welcomeBack', { name: nextUser.name.split(' ')[0] }), remember)
       return nextUser
     },
     [startSession, t],
   )
 
   const signup = useCallback(
-    async (input: SignupInput) => {
+    async (input: SignupInput, remember = true) => {
       const { token, user: nextUser } = await authApi.signup(input)
-      startSession(nextUser, token, t('auth.accountCreated', { name: nextUser.name.split(' ')[0] }))
+      startSession(nextUser, token, t('auth.accountCreated', { name: nextUser.name.split(' ')[0] }), remember)
       return nextUser
     },
     [startSession, t],

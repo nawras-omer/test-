@@ -16,18 +16,29 @@ import type {
 
 const TOKEN_KEY = 'kalori.auth.token'
 
+/**
+ * "Keep me signed in" → localStorage (survives restarts).
+ * Unchecked → sessionStorage (cleared when the tab closes).
+ */
 export function getStoredToken(): string | null {
   try {
-    return localStorage.getItem(TOKEN_KEY)
+    return sessionStorage.getItem(TOKEN_KEY) ?? localStorage.getItem(TOKEN_KEY)
   } catch {
     return null
   }
 }
 
-export function setStoredToken(token: string | null): void {
+export function setStoredToken(token: string | null, remember = true): void {
   try {
-    if (token) localStorage.setItem(TOKEN_KEY, token)
-    else localStorage.removeItem(TOKEN_KEY)
+    if (!token) {
+      sessionStorage.removeItem(TOKEN_KEY)
+      localStorage.removeItem(TOKEN_KEY)
+      return
+    }
+    const target = remember ? localStorage : sessionStorage
+    const other = remember ? sessionStorage : localStorage
+    other.removeItem(TOKEN_KEY)
+    target.setItem(TOKEN_KEY, token)
   } catch {
     /* private mode / storage disabled — the session simply won't persist */
   }

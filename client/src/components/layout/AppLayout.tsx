@@ -9,7 +9,7 @@ export function AppLayout() {
   return (
     <div className="app-shell">
       <a className="skip-link" href="#main">
-        {t('nav.openMenu')}
+        {t('a11y.skipToContent')}
       </a>
       <Navbar />
       <main className="app-main" id="main">

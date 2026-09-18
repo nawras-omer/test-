@@ -13,6 +13,7 @@ export const ar: Dictionary = {
   'nav.openMenu': 'فتح قائمة التنقل',
   'nav.closeMenu': 'إغلاق قائمة التنقل',
 
+  'a11y.skipToContent': 'الانتقال إلى المحتوى الرئيسي',
   'common.soon': 'قريبًا',
   'common.comingSoon': 'قريبًا',
   'common.placeholderNote': 'نسخة أساسية — بيانات تجريبية، ولا يوجد تسجيل فعلي بعد.',

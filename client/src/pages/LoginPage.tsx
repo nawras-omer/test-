@@ -39,7 +39,8 @@ export function LoginPage() {
 
     setSubmitting(true)
     try {
-      await login({ email: email.trim(), password })
+      // "Keep me signed in" decides localStorage vs sessionStorage.
+      await login({ email: email.trim(), password }, remember)
       navigate(redirectTo, { replace: true })
     } catch (error) {
       setErrors(fieldMessages(t, error))
@@ -90,7 +91,12 @@ export function LoginPage() {
 
         <div className="auth__meta">
           <label className="checkbox">
-            <input type="checkbox" checked={remember} onChange={(event) => setRemember(event.target.checked)} />
+            <input
+              type="checkbox"
+              checked={remember}
+              onChange={(event) => setRemember(event.target.checked)}
+              name="remember"
+            />
             {t('auth.remember')}
           </label>
           <button type="button" className="btn btn--link" disabled title={t('common.comingSoon')}>
