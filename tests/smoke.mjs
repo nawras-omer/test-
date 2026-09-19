@@ -29,9 +29,13 @@ async function apiLogin() {
   return (await response.json()).token
 }
 
-/** Wipes the demo account's diary, goals and custom foods so every run starts clean. */
+/**
+ * Wipes the demo account so every run starts clean: diary, custom foods, goals,
+ * the profile the goal calculator reads, and the assistant transcript.
+ */
 async function resetDemoAccount(token) {
   const auth = { Authorization: `Bearer ${token}` }
+  const json = { ...auth, 'Content-Type': 'application/json' }
   const { entries } = await fetch(`${API}/entries`, { headers: auth }).then((r) => r.json())
   for (const entry of entries) {
     await fetch(`${API}/entries/${entry.id}`, { method: 'DELETE', headers: auth })
@@ -40,10 +44,17 @@ async function resetDemoAccount(token) {
   for (const food of foods) {
     await fetch(`${API}/foods/${food.id}`, { method: 'DELETE', headers: auth })
   }
+  await fetch(`${API}/assistant/messages`, { method: 'DELETE', headers: auth })
   await fetch(`${API}/auth/goals`, {
     method: 'PATCH',
-    headers: { ...auth, 'Content-Type': 'application/json' },
+    headers: json,
     body: JSON.stringify({ calories: 2150, protein: 140, carbs: 240, fat: 70 }),
+  })
+  // Profile numbers feed the goal calculator, so clear them too.
+  await fetch(`${API}/auth/profile`, {
+    method: 'PATCH',
+    headers: json,
+    body: JSON.stringify({ name: 'Demo User', sex: null, age: null, heightCm: null, weightKg: null, targetWeightKg: null, activity: 'moderate' }),
   })
   return entries.length
 }
@@ -121,6 +132,13 @@ function setValue(el, value) {
   const setter = Object.getOwnPropertyDescriptor(Object.getPrototypeOf(el), 'value').set
   setter.call(el, value)
   fire(el, 'input')
+}
+
+/** Selects an option the way React expects (native setter + change event). */
+function setSelect(el, value) {
+  const setter = Object.getOwnPropertyDescriptor(Object.getPrototypeOf(el), 'value').set
+  setter.call(el, value)
+  fire(el, 'change')
 }
 
 /** Fills a form control by its `name` attribute, wherever it lives. */
@@ -495,6 +513,188 @@ check(
 await pickLanguage('English')
 await wait(200)
 
+/* ------------------------------------------------- goals & weekly summary -- */
+
+await goToNav('Goals')
+check('goal page renders', text().includes('Goals & progress') && Boolean($('[data-testid="goal-progress"]')))
+check('progress ring shows today against the target', $('.ring__number')?.textContent?.trim() === '900', $('.ring__number')?.textContent ?? '')
+check('progress copy states the share of the goal', text().includes('38% of goal'), text().slice(-220))
+check(
+  'macro progress indicators are drawn from the same targets',
+  $$('[data-testid="goal-progress"] .bar').length === 3,
+  String($$('[data-testid="goal-progress"] .bar').length),
+)
+check(
+  'weekly summary counts the logged days',
+  Boolean($('[data-testid="weekly-summary"]')) && text().includes('1 of 7 days'),
+  text().slice(-160),
+)
+check('weekly average intake is reported', $('[data-testid="weekly-average"]')?.textContent?.includes('900'), $('[data-testid="weekly-average"]')?.textContent ?? '')
+check('goal achievement rate is reported', ($('[data-testid="weekly-rate"]')?.textContent ?? '').includes('0%'), $('[data-testid="weekly-rate"]')?.textContent ?? '')
+
+/* --------------------------------------------------------- edit profile -- */
+
+check('profile card is editable', Boolean($('[data-testid="profile-card"]')) && Boolean($('[name="profile-age"]')))
+click(byText('button', 'Suggest targets'))
+await wait(150)
+check('the calculator asks for the missing profile numbers', Boolean($('[data-testid="goal-suggestion-incomplete"]')))
+
+setSelect($('[name="profile-sex"]'), 'female')
+fill('profile-age', '31')
+fill('profile-height', '165')
+fill('profile-weight', '62')
+fill('profile-target-weight', '58')
+setSelect($('[name="profile-activity"]'), 'light')
+await wait(80)
+click(byText('button', 'Save profile'))
+check('profile save is confirmed', await waitForToast('Profile updated'), lastToast())
+
+const storedProfile = await fetch(`${API}/auth/me`, { headers: authHeaders }).then((r) => r.json())
+check(
+  'the profile is persisted',
+  storedProfile.user.profile?.age === 31 && storedProfile.user.profile?.weightKg === 62 && storedProfile.user.profile?.sex === 'female',
+  JSON.stringify(storedProfile.user.profile),
+)
+
+click(byText('button', 'Suggest targets'))
+await wait(200)
+const suggestionText = $('[data-testid="goal-suggestion"]')?.textContent ?? ''
+const suggestedKcal = Number((suggestionText.match(/([\d,]+) kcal/) ?? [])[1]?.replace(/,/g, '') ?? 0)
+check('a target is calculated from the profile', suggestedKcal > 1200 && suggestedKcal < 4000, `${suggestedKcal} — ${suggestionText.slice(0, 120)}`)
+check('the suggestion explains the maintenance number', suggestionText.includes('Maintenance'), suggestionText.slice(0, 160))
+
+click(byText('button', 'Use these targets'))
+check('applying the suggestion is confirmed', await waitForToast('Suggested targets applied'), lastToast())
+const appliedGoals = await fetch(`${API}/auth/me`, { headers: authHeaders }).then((r) => r.json())
+check('the suggested targets reach the account', appliedGoals.user.goals.calories === suggestedKcal, JSON.stringify(appliedGoals.user.goals))
+
+// Put the dashboard goal back, so the later screens assert a known number.
+fill('goal-calories', '2400')
+await wait(80)
+click(byText('button', 'Save goals'))
+check('the goal can be edited back', await waitForToast('Daily goals updated'), lastToast())
+check('the daily targets form stores what was typed', $('[name="goal-calories"]')?.value === '2400', $('[name="goal-calories"]')?.value ?? '')
+
+/* ----------------------------------------------------------- assistant -- */
+
+await goToNav('Assistant')
+check('assistant page renders a conversation', Boolean($('.chat--page')) && text().includes('Ask me anything about your day'))
+check('composer is available', Boolean($('#chat-input-page')) && Boolean($('.chat--page .chat__composer')))
+check('the assistant advertises running on-device', text().includes('On-device'))
+
+async function chatSay(text) {
+  const input = $('#chat-input-page') ?? $('#chat-input-panel')
+  setValue(input, text)
+  await wait(40)
+  const before = $$('.chat__msg--bot').length
+  input.closest('form').dispatchEvent(new window.Event('submit', { bubbles: true, cancelable: true }))
+  // Wait for the typing indicator to finish *and* a new bubble to land.
+  await waitFor(() => $$('.chat__msg--bot').length > before && !$('.chat__typing'), 5000)
+  await wait(120)
+  return $$('.chat__msg--bot').at(-1)?.textContent ?? ''
+}
+
+const entriesBefore = (await fetch(`${API}/entries`, { headers: authHeaders }).then((r) => r.json())).entries.length
+const logReply = await chatSay('I ate a chicken breast and rice for lunch')
+check('a natural-language sentence is logged', /chicken/i.test(logReply) && /rice/i.test(logReply), logReply.slice(0, 160))
+check('logging is confirmed with a toast', await waitFor(() => /added to lunch/i.test(lastToast())), lastToast())
+const afterLog = await fetch(`${API}/entries`, { headers: authHeaders }).then((r) => r.json())
+check('the assistant wrote real diary entries', afterLog.entries.length === entriesBefore + 2, `${entriesBefore} → ${afterLog.entries.length}`)
+check(
+  'the diary entry kept the numbers the assistant understood',
+  afterLog.entries.some((entry) => entry.name.includes('Chicken') && entry.calories > 100 && entry.protein > 20),
+  JSON.stringify(afterLog.entries.map((entry) => `${entry.name}:${entry.calories}`)),
+)
+
+const estimateReply = await chatSay('how many calories in 2 cups of rice?')
+check('a calorie question is answered without logging', /rice/i.test(estimateReply) && /\d/.test(estimateReply), estimateReply.slice(0, 160))
+check('the estimate offers to save it', Boolean(byText('.chat-card .btn--primary', 'Save to diary')))
+const beforeSave = (await fetch(`${API}/entries`, { headers: authHeaders }).then((r) => r.json())).entries.length
+const toastBefore = lastToast()
+click(byText('.chat-card .btn--primary', 'Save to diary'))
+check(
+  'an estimate can be saved to the diary',
+  await waitFor(() => lastToast() !== toastBefore && lastToast().includes('Added to')),
+  lastToast(),
+)
+await wait(200)
+const afterSave = await fetch(`${API}/entries`, { headers: authHeaders }).then((r) => r.json())
+check('the saved estimate became an entry', afterSave.entries.length === beforeSave + 1, `${beforeSave} → ${afterSave.entries.length}`)
+
+const suggestReply = await chatSay('what should I eat for dinner?')
+check(
+  'meal suggestions respect the remaining budget',
+  /ideas for dinner/i.test(suggestReply) && $$('.chat-suggest__row').length === 3,
+  suggestReply.slice(0, 140),
+)
+check('suggestions are labelled with a reason', $$('.chat-suggest__row .chip').length >= 3, String($$('.chat-suggest__row .chip').length))
+const beforeAdd = (await fetch(`${API}/entries`, { headers: authHeaders }).then((r) => r.json())).entries.length
+const toastBeforeAdd = lastToast()
+click($$('.chat-suggest__row .btn').at(-1))
+check(
+  'one suggestion can be added in a tap',
+  await waitFor(() => lastToast() !== toastBeforeAdd && /added to dinner/i.test(lastToast())),
+  lastToast(),
+)
+const afterAdd = await fetch(`${API}/entries`, { headers: authHeaders }).then((r) => r.json())
+check('adding a suggestion logs it', afterAdd.entries.length === beforeAdd + 1, `${beforeAdd} → ${afterAdd.entries.length}`)
+
+const summaryReply = await chatSay('how am I doing today?')
+check('the day summary answers with real numbers', summaryReply.includes('Today so far') && summaryReply.includes('kcal'), summaryReply.slice(0, 140))
+
+const helpReply = await chatSay('what can you do?')
+check('help lists the assistant capabilities', helpReply.includes('Things you can ask me') && helpReply.includes('logs it for you'), helpReply.slice(0, 160))
+
+const fallbackReply = await chatSay('zzzx qqqq wwww')
+check('unknown input gets a graceful fallback', fallbackReply.includes('I am not sure what you meant'), fallbackReply.slice(0, 140))
+
+const storedChat = await fetch(`${API}/assistant/messages`, { headers: authHeaders }).then((r) => r.json())
+check('the transcript is persisted server-side', storedChat.messages.length >= 12, String(storedChat.messages.length))
+check(
+  'the transcript stores structure, not prose',
+  storedChat.messages.some((message) => message.role === 'assistant' && message.kind === 'reply.log' && message.data?.totals?.kcal > 0),
+  JSON.stringify(storedChat.messages.map((message) => message.kind)),
+)
+
+/* --------------------------------------- the chat lives beside the board -- */
+
+await goToNav('Dashboard')
+check('the dashboard carries the assistant beside it', Boolean($('.chat--panel')) && Boolean($('#chat-input-panel')))
+const panelMessages = $$('.chat--panel .chat__msg').length
+check('the same conversation is visible from the dashboard', panelMessages >= storedChat.messages.length, `${panelMessages} messages`)
+check('the dashboard links through to the full assistant', Boolean(byText('.page__actions a', 'Open the assistant')))
+check(
+  'the transcript re-renders from the stored structure',
+  $$('.chat--panel .chat-card').length >= 4,
+  String($$('.chat--panel .chat-card').length),
+)
+
+/* --------------------------------------------- the assistant in Arabic -- */
+
+await pickLanguage('العربية')
+check('assistant follows the interface into Arabic', html().dir === 'rtl' && text().includes('مساعد التغذية'), text().slice(0, 120))
+await goToNav('المساعد')
+const arabicReply = await chatSay('أكلت تفاحة')
+check('an Arabic sentence is understood', arabicReply.includes('تفاح'), arabicReply.slice(0, 160))
+check('the Arabic answer is localised, not English', /[\u0600-\u06FF]/.test(arabicReply) && !arabicReply.includes('Saved to'), arabicReply.slice(0, 120))
+check('the Arabic confirmation toast appears', await waitForToast('سعرة'), lastToast())
+const arabicEntries = await fetch(`${API}/entries`, { headers: authHeaders }).then((r) => r.json())
+check(
+  'the Arabic log reached the diary',
+  arabicEntries.entries.some((entry) => entry.name.includes('تفاح')),
+  JSON.stringify(arabicEntries.entries.slice(-2).map((entry) => entry.name)),
+)
+
+click($('.chat--page .chat__actions .icon-btn'))
+await wait(300)
+check('clearing the chat is confirmed', await waitForToast('تم مسح سجل المحادثة'), lastToast())
+check('the conversation is emptied', $$('.chat__msg').length === 0, String($$('.chat__msg').length))
+const clearedChat = await fetch(`${API}/assistant/messages`, { headers: authHeaders }).then((r) => r.json())
+check('clearing persists', clearedChat.messages.length === 0, String(clearedChat.messages.length))
+
+await pickLanguage('English')
+await wait(200)
+
 /* ------------------------------------------------------- guard + sign out -- */
 
 await openUserMenuItem('Profile')
@@ -504,6 +704,13 @@ click($('.user-trigger'))
 await wait(150)
 click($$('.dropdown__menu button').find((el) => el.textContent.includes('Sign out')))
 check('sign-out clears the session', await waitFor(() => Boolean($('form')) && !window.localStorage.getItem('kalori.auth.token')))
+
+/* --------------------------------------------------------------- teardown -- */
+
+// Leave the demo account as the seed left it, so manual browsing starts clean.
+await wait(200)
+const clearedAfter = await resetDemoAccount(token)
+console.log(`[teardown] reset the demo account (removed ${clearedAfter} entries)\n`)
 
 const failures = results.filter((result) => !result.ok)
 console.log(`\n${results.length - failures.length}/${results.length} checks passed`)

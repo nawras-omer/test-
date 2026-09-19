@@ -233,6 +233,107 @@ export function validateCustomFood(input = {}) {
   return { ok: Object.keys(errors).length === 0, errors, value }
 }
 
+/* ---------------------------------------------------------------- profile -- */
+
+const SEXES = new Set(['male', 'female'])
+export const ACTIVITY_LEVELS = ['sedentary', 'light', 'moderate', 'active', 'veryActive']
+const ACTIVITIES = new Set(ACTIVITY_LEVELS)
+
+const BODY_RULES = {
+  age: { min: 10, max: 120, code: 'AGE_RANGE', integer: true },
+  heightCm: { min: 80, max: 250, code: 'HEIGHT_RANGE', integer: false },
+  weightKg: { min: 25, max: 400, code: 'WEIGHT_RANGE', integer: false },
+  targetWeightKg: { min: 25, max: 400, code: 'WEIGHT_RANGE', integer: false },
+}
+
+/**
+ * The goal-setting page's profile block. Every field is optional: sending a
+ * key sets it, sending `null` clears it, omitting it leaves it untouched.
+ */
+export function validateProfile(input = {}) {
+  const errors = {}
+  const value = {}
+
+  if ('name' in input) {
+    const name = String(input.name ?? '').trim()
+    if (!name) errors.name = 'NAME_REQUIRED'
+    else if (name.length < 2) errors.name = 'NAME_TOO_SHORT'
+    else if (name.length > MAX_NAME_LENGTH) errors.name = 'NAME_TOO_LONG'
+    else value.name = name
+  }
+
+  if ('sex' in input) {
+    const sex = input.sex === null || input.sex === '' ? null : String(input.sex).trim().toLowerCase()
+    if (sex === null) value.sex = null
+    else if (!SEXES.has(sex)) errors.sex = 'SEX_INVALID'
+    else value.sex = sex
+  }
+
+  for (const [key, rule] of Object.entries(BODY_RULES)) {
+    if (!(key in input)) continue
+    const raw = input[key]
+    if (raw === null || raw === '') {
+      value[key] = null
+      continue
+    }
+    const number = Number(raw)
+    if (!Number.isFinite(number)) errors[key] = rule.code
+    else if (number < rule.min || number > rule.max) errors[key] = rule.code
+    else value[key] = rule.integer ? Math.round(number) : Math.round(number * 10) / 10
+  }
+
+  if ('activity' in input) {
+    const activity = String(input.activity ?? '').trim()
+    if (!ACTIVITIES.has(activity)) errors.activity = 'ACTIVITY_INVALID'
+    else value.activity = activity
+  }
+
+  return { ok: Object.keys(errors).length === 0, errors, value }
+}
+
+/* -------------------------------------------------------------- assistant -- */
+
+export const MAX_MESSAGE_TEXT = 2000
+/** Payload cap for a structured assistant message (cards, suggestions…). */
+const MAX_MESSAGE_DATA = 8000
+const CHAT_ROLES = new Set(['user', 'assistant'])
+
+/** Messages are stored as *structure* (kind + data); the UI renders the words,
+ *  so a stored conversation re-renders when the language changes. */
+export function validateAssistantMessage(input = {}) {
+  const errors = {}
+  const value = {}
+
+  const role = String(input.role ?? '').trim()
+  if (!CHAT_ROLES.has(role)) errors.role = 'CHAT_ROLE_INVALID'
+  else value.role = role
+
+  const text = String(input.text ?? '').trim()
+  if (text.length > MAX_MESSAGE_TEXT) errors.text = 'CHAT_TEXT_TOO_LONG'
+  else value.text = text
+
+  const kind = String(input.kind ?? 'text').trim()
+  if (!/^[a-zA-Z0-9._-]{1,40}$/.test(kind)) errors.kind = 'CHAT_KIND_INVALID'
+  else value.kind = kind
+
+  if (input.data === undefined || input.data === null) {
+    value.data = null
+  } else if (typeof input.data !== 'object') {
+    errors.data = 'CHAT_DATA_INVALID'
+  } else {
+    let serialised = ''
+    try {
+      serialised = JSON.stringify(input.data)
+    } catch {
+      serialised = ''
+    }
+    if (!serialised || serialised.length > MAX_MESSAGE_DATA) errors.data = 'CHAT_DATA_INVALID'
+    else value.data = JSON.parse(serialised)
+  }
+
+  return { ok: Object.keys(errors).length === 0, errors, value }
+}
+
 /** Query-string window for GET /api/entries (both bounds optional). */
 export function validateEntryQuery({ from, to, limit } = {}) {
   const errors = {}

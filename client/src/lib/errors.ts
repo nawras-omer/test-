@@ -49,6 +49,20 @@ const KNOWN_CODES = [
   'GOAL_REQUIRED',
   'GOAL_INVALID',
   'GOAL_RANGE',
+  /* profile */
+  'SEX_INVALID',
+  'AGE_RANGE',
+  'HEIGHT_RANGE',
+  'WEIGHT_RANGE',
+  'ACTIVITY_INVALID',
+  /* assistant */
+  'CHAT_ROLE_INVALID',
+  'CHAT_TEXT_TOO_LONG',
+  'CHAT_KIND_INVALID',
+  'CHAT_DATA_INVALID',
+  'LIMIT_INVALID',
+  'ASSISTANT_UNAVAILABLE',
+  'ASSISTANT_ERROR',
 ] as const
 
 type KnownCode = (typeof KNOWN_CODES)[number]

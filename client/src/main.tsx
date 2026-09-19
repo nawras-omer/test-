@@ -8,6 +8,7 @@ import { AuthProvider } from './lib/auth'
 import { EntriesProvider } from './lib/entries'
 import { CustomFoodsProvider } from './lib/customFoods'
 import { FoodLogProvider } from './components/food/FoodLogProvider'
+import { AssistantProvider } from './lib/assistant/AssistantProvider'
 import { ThemeProvider } from './lib/theme'
 import { I18nProvider } from './i18n'
 
@@ -32,13 +33,17 @@ createRoot(container).render(
                 every screen shares the same live data. */}
             <EntriesProvider>
               <CustomFoodsProvider>
-                <FoodLogProvider>
+                {/* The assistant reads the diary + custom foods, so it sits
+                    inside both; the chat transcript outlives navigation. */}
+                <AssistantProvider>
+                  <FoodLogProvider>
                   <BrowserRouter>
                     <ErrorBoundary>
                       <App />
                     </ErrorBoundary>
                   </BrowserRouter>
                 </FoodLogProvider>
+                </AssistantProvider>
               </CustomFoodsProvider>
             </EntriesProvider>
           </AuthProvider>

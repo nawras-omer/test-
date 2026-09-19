@@ -50,5 +50,6 @@ export function publicUser(user) {
     createdAt: user.createdAt,
     preferences: user.preferences,
     goals: user.goals,
+    profile: user.profile ?? null,
   }
 }

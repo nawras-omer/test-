@@ -7,6 +7,7 @@ import {
   normaliseEmail,
   sanitisePreferences,
   validateGoals,
+  validateProfile,
   validateLogin,
   validateSignup,
 } from '../lib/validate.js'
@@ -131,6 +132,28 @@ router.patch('/goals', requireAuth, async (req, res, next) => {
     if (Object.keys(value).length === 0) return fail(res, 422, 'VALIDATION_FAILED', {})
 
     const updated = await db.updateUser(req.user.id, { goals: { ...req.user.goals, ...value } })
+    res.json({ user: publicUser(updated) })
+  } catch (err) {
+    next(err)
+  }
+})
+
+/** Editable profile: display name plus the optional body metrics the goal
+ *  calculator uses. Each field is independent — omit to leave it alone. */
+router.patch('/profile', requireAuth, async (req, res, next) => {
+  try {
+    const { ok, errors, value } = validateProfile(req.body ?? {})
+    if (!ok) return fail(res, 422, 'VALIDATION_FAILED', errors)
+    if (Object.keys(value).length === 0) return fail(res, 422, 'VALIDATION_FAILED', {})
+
+    const { name, ...profilePatch } = value
+    const patch = {}
+    if (name !== undefined) patch.name = name
+    if (Object.keys(profilePatch).length > 0) {
+      patch.profile = { ...(req.user.profile ?? {}), ...profilePatch }
+    }
+
+    const updated = await db.updateUser(req.user.id, patch)
     res.json({ user: publicUser(updated) })
   } catch (err) {
     next(err)

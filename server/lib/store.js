@@ -18,7 +18,23 @@ const DB_FILE = path.join(DATA_DIR, 'users.json')
 export const DEFAULT_GOALS = { calories: 2150, protein: 140, carbs: 240, fat: 70 }
 export const DEFAULT_PREFERENCES = { language: 'en', palette: 'green', colorMode: 'light' }
 
-const EMPTY_DB = { version: 3, users: [], entries: [], customFoods: [] }
+/**
+ * Optional body metrics. They power the goal calculator (Mifflin–St Jeor) and
+ * stay null until the user fills them in — nothing in the app requires them.
+ */
+export const DEFAULT_PROFILE = {
+  sex: null,
+  age: null,
+  heightCm: null,
+  weightKg: null,
+  activity: 'moderate',
+  targetWeightKg: null,
+}
+
+/** How many chat messages are kept per user (oldest are dropped). */
+export const MAX_CHAT_MESSAGES = 200
+
+const EMPTY_DB = { version: 4, users: [], entries: [], customFoods: [], chatMessages: [] }
 
 let cache = null
 let writeChain = Promise.resolve()
@@ -29,6 +45,16 @@ function normaliseUser(user) {
     ...user,
     preferences: { ...DEFAULT_PREFERENCES, ...(user.preferences ?? {}) },
     goals: { ...DEFAULT_GOALS, ...(user.goals ?? {}) },
+    profile: { ...DEFAULT_PROFILE, ...(user.profile ?? {}) },
+  }
+}
+
+function normaliseMessage(message) {
+  return {
+    text: '',
+    kind: 'text',
+    data: null,
+    ...message,
   }
 }
 
@@ -63,6 +89,7 @@ async function load() {
       users: (Array.isArray(parsed.users) ? parsed.users : []).map(normaliseUser),
       entries: (Array.isArray(parsed.entries) ? parsed.entries : []).map(normaliseEntry),
       customFoods: (Array.isArray(parsed.customFoods) ? parsed.customFoods : []).map(normaliseCustomFood),
+      chatMessages: (Array.isArray(parsed.chatMessages) ? parsed.chatMessages : []).map(normaliseMessage),
     }
   } catch (err) {
     if (err.code !== 'ENOENT') {
@@ -210,6 +237,35 @@ export const db = {
     const [removed] = data.customFoods.splice(index, 1)
     await flush()
     return removed
+  },
+
+  /* --------------------------------------------------------------- chat -- */
+  /** Oldest → newest, so the transcript reads top-down. */
+  async listMessages(userId, limit = MAX_CHAT_MESSAGES) {
+    const data = await load()
+    const rows = data.chatMessages.filter((message) => message.userId === userId)
+    const trimmed = Number.isInteger(limit) && limit > 0 ? rows.slice(-limit) : rows
+    return trimmed.map((message) => ({ ...message }))
+  },
+
+  async createMessage(message) {
+    const data = await load()
+    data.chatMessages.push(normaliseMessage(message))
+    const own = data.chatMessages.filter((row) => row.userId === message.userId)
+    if (own.length > MAX_CHAT_MESSAGES) {
+      const excess = new Set(own.slice(0, own.length - MAX_CHAT_MESSAGES).map((row) => row.id))
+      data.chatMessages = data.chatMessages.filter((row) => !excess.has(row.id))
+    }
+    await flush()
+    return { ...message }
+  },
+
+  async clearMessages(userId) {
+    const data = await load()
+    const before = data.chatMessages.length
+    data.chatMessages = data.chatMessages.filter((message) => message.userId !== userId)
+    await flush()
+    return before - data.chatMessages.length
   },
 
   async deleteEntry(userId, id) {

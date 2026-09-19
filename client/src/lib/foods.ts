@@ -216,6 +216,22 @@ export function searchLibrary({ query = '', filter = ALL_FILTER, custom = [], li
   return { entries: limit === undefined ? all : all.slice(0, limit), total }
 }
 
+/** O(1) lookup for the assistant, which stores foods by id. */
+const BY_ID = new Map(FOODS.map((food) => [food.id, food]))
+
+/**
+ * Resolves a stored food id back to a library entry. Custom ids are prefixed
+ * `custom:` because the two id spaces are otherwise independent.
+ */
+export function findEntryById(id: string, custom: CustomFood[] = []): LibraryEntry | null {
+  if (id.startsWith('custom:')) {
+    const food = custom.find((row) => row.id === id.slice('custom:'.length))
+    return food ? { kind: 'custom', food } : null
+  }
+  const food = BY_ID.get(id)
+  return food ? { kind: 'bundled', food } : null
+}
+
 /** Example queries shown as chips under the search box. */
 export const SEARCH_SUGGESTIONS: TranslationKey[] = [
   'library.search.example.apple',

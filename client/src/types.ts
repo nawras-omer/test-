@@ -22,6 +22,32 @@ export interface UserGoals {
   fat: number
 }
 
+export type Sex = 'male' | 'female'
+export type ActivityLevel = 'sedentary' | 'light' | 'moderate' | 'active' | 'veryActive'
+
+export const ACTIVITY_LEVELS: ActivityLevel[] = ['sedentary', 'light', 'moderate', 'active', 'veryActive']
+/** Multipliers used by the goal calculator (Mifflin–St Jeor → TDEE). */
+export const ACTIVITY_FACTORS: Record<ActivityLevel, number> = {
+  sedentary: 1.2,
+  light: 1.375,
+  moderate: 1.55,
+  active: 1.725,
+  veryActive: 1.9,
+}
+
+/**
+ * Optional body metrics. They feed the goal calculator on the goals page and
+ * are all nullable — the app works fine without them.
+ */
+export interface UserProfile {
+  sex: Sex | null
+  age: number | null
+  heightCm: number | null
+  weightKg: number | null
+  activity: ActivityLevel
+  targetWeightKg: number | null
+}
+
 export interface User {
   id: string
   name: string
@@ -29,6 +55,18 @@ export interface User {
   createdAt: string
   preferences: UserPreferences
   goals: UserGoals
+  profile: UserProfile | null
+}
+
+/** Editable profile fields (`PATCH /api/auth/profile`). */
+export interface ProfileInput {
+  name?: string
+  sex?: Sex | null
+  age?: number | null
+  heightCm?: number | null
+  weightKg?: number | null
+  activity?: ActivityLevel
+  targetWeightKg?: number | null
 }
 
 export interface AuthResponse {
@@ -46,6 +84,32 @@ export interface SignupInput {
 export interface LoginInput {
   email: string
   password: string
+}
+
+/* -------------------------------------------------------------- assistant -- */
+
+export type ChatRole = 'user' | 'assistant'
+
+/**
+ * One chat message. The assistant never stores prose: it stores a `kind` plus a
+ * small JSON payload, and the UI renders the words — so the whole transcript
+ * re-renders in whichever language the user switches to.
+ */
+export interface AssistantMessage {
+  id: string
+  role: ChatRole
+  /** Raw text, for user messages (and as a fallback for unknown kinds). */
+  text: string
+  kind: string
+  data: Record<string, unknown> | null
+  createdAt: string
+}
+
+export interface AssistantMessageInput {
+  role: ChatRole
+  text?: string
+  kind?: string
+  data?: Record<string, unknown> | null
 }
 
 /* ------------------------------------------------------------------ diary -- */
@@ -169,6 +233,18 @@ export type ApiErrorCode =
   | 'CUSTOM_FOOD_DUPLICATE'
   | 'CUSTOM_FOOD_LIMIT_REACHED'
   | 'CUSTOM_FOOD_NOT_FOUND'
+  /* profile */
+  | 'SEX_INVALID'
+  | 'AGE_RANGE'
+  | 'HEIGHT_RANGE'
+  | 'WEIGHT_RANGE'
+  | 'ACTIVITY_INVALID'
+  /* assistant */
+  | 'CHAT_ROLE_INVALID'
+  | 'CHAT_TEXT_TOO_LONG'
+  | 'CHAT_KIND_INVALID'
+  | 'CHAT_DATA_INVALID'
+  | 'ASSISTANT_UNAVAILABLE'
   /* goals */
   | 'GOAL_REQUIRED'
   | 'GOAL_INVALID'

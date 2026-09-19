@@ -1,8 +1,10 @@
 import { Route, Routes } from 'react-router-dom'
 import { AppLayout } from '@/components/layout/AppLayout'
 import { ProtectedRoute, PublicOnlyRoute } from '@/components/routes/RouteGuards'
+import { AssistantPage } from '@/pages/AssistantPage'
 import { DashboardPage } from '@/pages/DashboardPage'
 import { DiaryPage } from '@/pages/DiaryPage'
+import { GoalsPage } from '@/pages/GoalsPage'
 import { LibraryPage } from '@/pages/LibraryPage'
 import { LoginPage } from '@/pages/LoginPage'
 import { MealsPage } from '@/pages/MealsPage'
@@ -15,7 +17,8 @@ import { SignupPage } from '@/pages/SignupPage'
 /**
  * Route map
  *   public   /login · /signup      (redirect away when already signed in)
- *   private  / · /library · /diary · /meals · /progress · /settings · /profile
+ *   private  / · /library · /diary · /meals · /progress · /goals · /assistant
+ *            · /settings · /profile
  *   fallback *                     (inside the app shell)
  */
 export function App() {
@@ -33,6 +36,8 @@ export function App() {
           <Route path="diary" element={<DiaryPage />} />
           <Route path="meals" element={<MealsPage />} />
           <Route path="progress" element={<ProgressPage />} />
+          <Route path="goals" element={<GoalsPage />} />
+          <Route path="assistant" element={<AssistantPage />} />
           <Route path="settings" element={<SettingsPage />} />
           <Route path="profile" element={<ProfilePage />} />
           <Route path="*" element={<NotFoundPage />} />

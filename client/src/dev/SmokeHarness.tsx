@@ -15,6 +15,7 @@ import { ErrorBoundary } from '@/components/ErrorBoundary'
 import { EntriesProvider } from '@/lib/entries'
 import { CustomFoodsProvider } from '@/lib/customFoods'
 import { FoodLogProvider } from '@/components/food/FoodLogProvider'
+import { AssistantProvider } from '@/lib/assistant/AssistantProvider'
 import { ToastProvider } from '@/components/ui/Toast'
 import { AuthProvider } from '@/lib/auth'
 import { ThemeProvider } from '@/lib/theme'
@@ -35,13 +36,15 @@ export function mount(container: HTMLElement, initialPath: string): Root {
             <AuthProvider>
               <EntriesProvider>
                 <CustomFoodsProvider>
-                  <FoodLogProvider>
-                  <MemoryRouter initialEntries={[initialPath]}>
-                    <ErrorBoundary>
-                      <App />
-                    </ErrorBoundary>
-                  </MemoryRouter>
-                  </FoodLogProvider>
+                  <AssistantProvider>
+                    <FoodLogProvider>
+                      <MemoryRouter initialEntries={[initialPath]}>
+                        <ErrorBoundary>
+                          <App />
+                        </ErrorBoundary>
+                      </MemoryRouter>
+                    </FoodLogProvider>
+                  </AssistantProvider>
                 </CustomFoodsProvider>
               </EntriesProvider>
             </AuthProvider>

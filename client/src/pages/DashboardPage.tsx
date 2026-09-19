@@ -1,10 +1,12 @@
+import { Link } from 'react-router-dom'
+import { ChatPanel } from '@/components/assistant/ChatPanel'
 import { CalorieCard } from '@/components/dashboard/CalorieCard'
 import { MacroCard } from '@/components/dashboard/MacroCard'
 import { MealBreakdownCard } from '@/components/dashboard/MealBreakdownCard'
 import { RecentEntriesCard } from '@/components/dashboard/RecentEntriesCard'
 import { StatCards } from '@/components/dashboard/StatCards'
 import { WeeklyChartCard } from '@/components/dashboard/WeeklyChartCard'
-import { CalendarIcon, PlusIcon } from '@/components/ui/Icons'
+import { CalendarIcon, PlusIcon, SparkleIcon } from '@/components/ui/Icons'
 import { useFoodLog } from '@/components/food/FoodLogProvider'
 import { useAuth } from '@/lib/auth'
 import { useEntries } from '@/lib/entries'
@@ -35,6 +37,10 @@ export function DashboardPage() {
             <CalendarIcon size={14} />
             {formatDate(new Date(), locale, { weekday: 'long', day: 'numeric', month: 'long' })}
           </span>
+          <Link className="btn btn--outline" to="/assistant">
+            <SparkleIcon size={17} />
+            {t('assistant.open')}
+          </Link>
           <button type="button" className="btn btn--primary" onClick={() => openFoodLog()}>
             <PlusIcon size={18} />
             {t('actions.logFood')}
@@ -68,6 +74,9 @@ export function DashboardPage() {
           <div className="stack" style={{ gap: 'var(--space-5)' }}>
             <MacroCard />
             <MealBreakdownCard />
+            {/* The assistant keeps its history beside the dashboard, as its own
+                column — on phones it fills the width and scrolls internally. */}
+            <ChatPanel />
           </div>
         </div>
       </div>

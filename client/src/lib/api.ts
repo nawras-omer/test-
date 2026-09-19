@@ -7,6 +7,8 @@
  */
 import type {
   ApiErrorCode,
+  AssistantMessage,
+  AssistantMessageInput,
   AuthResponse,
   CustomFood,
   CustomFoodInput,
@@ -14,6 +16,7 @@ import type {
   FoodEntryInput,
   LoginInput,
   SignupInput,
+  ProfileInput,
   User,
   UserGoals,
   UserPreferences,
@@ -142,6 +145,9 @@ export const authApi = {
   updateGoals: (goals: Partial<UserGoals>) =>
     request<{ user: User }>('/auth/goals', { method: 'PATCH', auth: true, body: goals }),
 
+  updateProfile: (profile: ProfileInput) =>
+    request<{ user: User }>('/auth/profile', { method: 'PATCH', auth: true, body: profile }),
+
   logout: () => request<{ ok: boolean }>('/auth/logout', { method: 'POST' }).catch(() => ({ ok: true })),
 }
 
@@ -171,4 +177,36 @@ export const foodsApi = {
     request<{ food: CustomFood }>('/foods', { method: 'POST', auth: true, body: input }),
 
   remove: (id: string) => request<{ ok: boolean; id: string }>(`/foods/${id}`, { method: 'DELETE', auth: true }),
+}
+
+/**
+ * Assistant endpoints. The conversation itself is computed in the browser
+ * (`client/src/lib/assistant/`) against the bundled food database; the server
+ * stores the transcript so it survives reloads and follows the account.
+ */
+export const assistantApi = {
+  status: (signal?: AbortSignal) =>
+    request<{ llm: boolean; provider: { configured: boolean; model: string | null } }>('/assistant/status', {
+      auth: true,
+      signal,
+    }),
+
+  list: (limit?: number, signal?: AbortSignal) =>
+    request<{ messages: AssistantMessage[] }>(`/assistant/messages${limit ? `?limit=${limit}` : ''}`, {
+      auth: true,
+      signal,
+    }),
+
+  append: (message: AssistantMessageInput) =>
+    request<{ message: AssistantMessage }>('/assistant/messages', { method: 'POST', auth: true, body: message }),
+
+  clear: () => request<{ ok: boolean; removed: number }>('/assistant/messages', { method: 'DELETE', auth: true }),
+
+  /** Open-ended question for the optional LLM provider (503 when unconfigured). */
+  respond: (messages: Array<{ role: string; content: string }>, locale: string, context?: unknown) =>
+    request<{ reply: string }>('/assistant/respond', {
+      method: 'POST',
+      auth: true,
+      body: { messages, locale, context },
+    }),
 }
