@@ -222,7 +222,7 @@ export function WorkoutSessionPage() {
   }
 
   return (
-    <div className="page" data-testid="workout-session-page" style={{ background: '#0a0a0a', minHeight: '100vh', margin: '-24px -16px', padding: '0' }}>
+    <div className="page" data-testid="workout-session-page" style={{ background: 'var(--flex-bg)', minHeight: '100vh', margin: '-24px -16px', padding: '0' }}>
       <div className="flex-theme" style={{ margin: 0, borderRadius: 0 }}>
         <div className="flex-page" style={{ maxWidth: '600px' }}>
           <div className="flex-log__header">
@@ -231,7 +231,7 @@ export function WorkoutSessionPage() {
               <button className="flex-icon-btn">⌄</button>
             </div>
             <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-              <div style={{ background: '#1c1c1e', borderRadius: '20px', padding: '8px 14px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', fontWeight: 600 }}>
+              <div style={{ background: 'var(--flex-card)', borderRadius: '20px', padding: '8px 14px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', fontWeight: 600 }}>
                 <span style={{ width: '20px', height: '20px', borderRadius: '10px', background: '#0a2a1a', display: 'grid', placeItems: 'center' }}>⏸</span>
                 {clockFormat(elapsed)}
               </div>
@@ -239,7 +239,7 @@ export function WorkoutSessionPage() {
             </div>
           </div>
 
-          <div style={{ background: '#1c1c1e', borderRadius: '20px', padding: '14px 16px', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <div style={{ background: 'var(--flex-card)', borderRadius: '20px', padding: '14px 16px', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '12px' }}>
             <div style={{ width: '44px', height: '44px', borderRadius: '12px', background: '#2a2a4a', display: 'grid', placeItems: 'center', fontSize: '20px' }}>🏋️</div>
             <div style={{ flex: 1 }}>
               <div style={{ fontWeight: 700, fontSize: '18px', display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -249,7 +249,7 @@ export function WorkoutSessionPage() {
             </div>
           </div>
 
-          <div style={{ background: '#1c1c1e', borderRadius: '12px', padding: '3px', marginBottom: '16px' }}>
+          <div style={{ background: 'var(--flex-card)', borderRadius: '12px', padding: '3px', marginBottom: '16px' }}>
             <div style={{ height: '6px', borderRadius: '6px', background: 'linear-gradient(90deg, #0a84ff, #30d158)', width: `${Math.round(progress * 100)}%` }} />
           </div>
 
@@ -285,7 +285,7 @@ export function WorkoutSessionPage() {
                   style={{ border: isCurrent ? '1px solid #0a84ff' : '1px solid transparent' }}
                 >
                   <div className="flex-log__exercise-head" onClick={() => setCurrent(exIndex)}>
-                    <div style={{ width: '48px', height: '48px', borderRadius: '14px', background: '#fff', display: 'grid', placeItems: 'center', color: '#000', fontSize: '20px' }}>🏋️</div>
+                    <div style={{ width: '48px', height: '48px', borderRadius: '14px', background: 'var(--flex-card)', display: 'grid', placeItems: 'center', color: 'var(--flex-text)', fontSize: '20px' }}>🏋️</div>
                     <div style={{ flex: 1 }}>
                       <div style={{ fontWeight: 700, fontSize: '15px' }}>{exName}</div>
                       <div style={{ fontSize: '12px', color: '#8e8e93' }}>4 back/ 11-2</div>
@@ -321,7 +321,7 @@ export function WorkoutSessionPage() {
                             style={{
                               background: 'transparent',
                               border: 'none',
-                              color: '#fff',
+                              color: 'var(--flex-text)',
                               fontSize: '18px',
                               fontWeight: 600,
                               width: '60px',
@@ -338,7 +338,7 @@ export function WorkoutSessionPage() {
                             style={{
                               background: 'transparent',
                               border: 'none',
-                              color: '#fff',
+                              color: 'var(--flex-text)',
                               fontSize: '18px',
                               fontWeight: 600,
                               width: '40px',
@@ -382,7 +382,7 @@ export function WorkoutSessionPage() {
             <button
               style={{
                 flex: 1,
-                background: allDone ? '#30d158' : '#2c2c2e',
+                background: allDone ? '#30d158' : 'var(--flex-border)',
                 color: allDone ? '#fff' : '#8e8e93',
                 borderRadius: '20px',
                 padding: '14px',
@@ -399,12 +399,12 @@ export function WorkoutSessionPage() {
 
           <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', marginBottom: '16px' }}>
             <button
-              style={{ background: 'transparent', border: '1px solid #2c2c2e', color: '#8e8e93', borderRadius: '16px', padding: '8px 16px', fontSize: '13px' }}
+              style={{ background: 'transparent', border: '1px solid var(--flex-border)', color: '#8e8e93', borderRadius: '16px', padding: '8px 16px', fontSize: '13px' }}
               onClick={() => setConfirmDiscard(true)}
             >
               Discard
             </button>
-            <Link to="/workouts" style={{ background: 'transparent', border: '1px solid #2c2c2e', color: '#8e8e93', borderRadius: '16px', padding: '8px 16px', fontSize: '13px', textDecoration: 'none' }}>
+            <Link to="/workouts" style={{ background: 'transparent', border: '1px solid var(--flex-border)', color: '#8e8e93', borderRadius: '16px', padding: '8px 16px', fontSize: '13px', textDecoration: 'none' }}>
               Back
             </Link>
           </div>

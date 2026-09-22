@@ -97,7 +97,7 @@ export function ProgressPage() {
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                   <div className="flex-stat-card__value" style={{ fontSize: '20px' }}>76 kg</div>
-                  <div style={{ width: '28px', height: '28px', borderRadius: '14px', background: '#2c2c2e', display: 'grid', placeItems: 'center' }}>+</div>
+                  <div style={{ width: '28px', height: '28px', borderRadius: '14px', background: 'var(--flex-card-2)', display: 'grid', placeItems: 'center' }}>+</div>
                 </div>
               </div>
             </div>
@@ -117,9 +117,9 @@ export function ProgressPage() {
             </div>
           </div>
 
-          <div style={{ background: '#1c1c1e', borderRadius: '20px', overflow: 'hidden' }}>
+          <div style={{ background: 'var(--flex-card)', borderRadius: '20px', overflow: 'hidden' }}>
             {EXERCISES.map((ex) => (
-              <div key={ex.name} className="flex-exercise-row" style={{ borderBottom: '1px solid #2c2c2e' }}>
+              <div key={ex.name} className="flex-exercise-row" style={{ borderBottom: '1px solid var(--flex-card-2)' }}>
                 <div className="flex-exercise-row__icon">🏋️</div>
                 <div className="flex-exercise-row__main">
                   <div className="flex-exercise-row__name" style={{ fontSize: '14px' }}>{ex.name}</div>

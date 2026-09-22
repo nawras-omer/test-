@@ -87,7 +87,7 @@ export function ChallengesPage() {
           </div>
           <div style={{ display: 'flex', gap: '16px', overflowX: 'auto', paddingBottom: '12px' }}>
             {ACHIEVEMENTS.map((a) => (
-              <div key={a.name} style={{ minWidth: '80px', height: '80px', background: '#1c1c1e', borderRadius: '16px', display: 'grid', placeItems: 'center', fontSize: '28px', border: '2px solid #ff9f0a' }}>
+              <div key={a.name} style={{ minWidth: '80px', height: '80px', background: 'var(--flex-card)', borderRadius: '16px', display: 'grid', placeItems: 'center', fontSize: '28px', border: '2px solid #ff9f0a' }}>
                 {a.icon}
               </div>
             ))}

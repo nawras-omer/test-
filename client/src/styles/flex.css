@@ -1,5 +1,31 @@
-/* FLEX dark theme for workout section - matches screenshots */
+/* FLEX theme - supports both light (default, matches new screenshots) and dark */
 .flex-theme {
+  --flex-bg: #f2f2f7;
+  --flex-card: #ffffff;
+  --flex-card-2: #f2f2f7;
+  --flex-card-3: #e5e5ea;
+  --flex-text: #000000;
+  --flex-text-muted: #8e8e93;
+  --flex-text-soft: #aeaeb2;
+  --flex-border: #e5e5ea;
+  --flex-border-strong: #d1d1d6;
+  --flex-primary: #30d158;
+  --flex-primary-gradient: linear-gradient(135deg, #0a84ff 0%, #30d158 100%);
+  --flex-accent: #0a84ff;
+  --flex-danger: #ff3b30;
+  --flex-warning: #ff9f0a;
+  --flex-success: #30d158;
+  --flex-shadow: 0 2px 12px rgba(0,0,0,0.06);
+  background: var(--flex-bg);
+  color: var(--flex-text);
+  min-height: 100vh;
+  margin: -24px -16px;
+  padding: 16px;
+  border-radius: 0;
+}
+
+/* Dark override - matches earlier dark screenshots */
+[data-mode="dark"] .flex-theme {
   --flex-bg: #0a0a0a;
   --flex-card: #1c1c1e;
   --flex-card-2: #2c2c2e;
@@ -8,18 +34,8 @@
   --flex-text-muted: #8e8e93;
   --flex-text-soft: #636366;
   --flex-border: #2c2c2e;
-  --flex-primary: #30d158;
-  --flex-primary-gradient: linear-gradient(135deg, #0a84ff 0%, #30d158 100%);
-  --flex-accent: #0a84ff;
-  --flex-danger: #ff3b30;
-  --flex-warning: #ff9f0a;
-  --flex-success: #30d158;
-  background: var(--flex-bg);
-  color: var(--flex-text);
-  min-height: 100vh;
-  margin: -24px -16px;
-  padding: 16px;
-  border-radius: 0;
+  --flex-border-strong: #3a3a3c;
+  --flex-shadow: 0 2px 12px rgba(0,0,0,0.3);
 }
 
 .flex-theme .page__header {
@@ -58,14 +74,17 @@
   place-items: center;
   color: var(--flex-text);
   cursor: pointer;
+  box-shadow: var(--flex-shadow);
 }
 
-/* Calendar strip - top */
+/* Calendar strip - top - light white card like screenshot */
 .flex-calendar {
   background: var(--flex-card);
   border-radius: 24px;
   padding: 16px;
   margin-bottom: 16px;
+  box-shadow: var(--flex-shadow);
+  border: 1px solid var(--flex-border);
 }
 .flex-calendar__top {
   display: flex;
@@ -81,6 +100,7 @@
   align-items: center;
   gap: 10px;
   font-weight: 600;
+  font-size: 14px;
 }
 .flex-calendar__xp {
   flex: 1;
@@ -91,6 +111,7 @@
   align-items: center;
   gap: 8px;
   font-weight: 700;
+  font-size: 14px;
 }
 .flex-calendar__grid {
   display: grid;
@@ -106,23 +127,29 @@
 }
 .flex-calendar__day--today {
   background: transparent;
-  border: 2px solid var(--flex-text-soft);
+  border: 2px solid var(--flex-accent);
   color: var(--flex-text);
   font-weight: 700;
 }
 .flex-calendar__day--active {
   color: var(--flex-text);
+  font-weight: 600;
 }
 
-/* Start workout card */
+/* Start workout card - light pastel gradient like screenshot */
 .flex-start-card {
-  background: linear-gradient(135deg, #2c2c4a 0%, #3a3a5a 100%);
+  background: linear-gradient(135deg, #e8f0fe 0%, #f3e8ff 50%, #e0f7fa 100%);
   border-radius: 24px;
   padding: 32px 20px;
   text-align: center;
   margin-bottom: 16px;
   position: relative;
   overflow: hidden;
+  border: 1px solid var(--flex-border);
+  cursor: pointer;
+}
+[data-mode="dark"] .flex-start-card {
+  background: linear-gradient(135deg, #2c2c4a 0%, #3a3a5a 100%);
 }
 .flex-start-card__icon {
   width: 56px;
@@ -133,11 +160,13 @@
   place-items: center;
   margin: 0 auto 16px;
   font-size: 28px;
+  color: #fff;
 }
 .flex-start-card h2 {
   font-size: 22px;
   font-weight: 700;
   margin-bottom: 6px;
+  color: var(--flex-text);
 }
 .flex-start-card p {
   color: var(--flex-text-muted);
@@ -152,6 +181,7 @@
   justify-content: space-between;
   margin-bottom: 24px;
   border: 1px solid var(--flex-border);
+  box-shadow: var(--flex-shadow);
 }
 .flex-plus {
   width: 40px;
@@ -173,6 +203,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  color: var(--flex-text);
 }
 .flex-collection-grid {
   display: grid;
@@ -187,17 +218,19 @@
   aspect-ratio: 1;
   background: var(--flex-card);
   cursor: pointer;
+  box-shadow: var(--flex-shadow);
+  border: 1px solid var(--flex-border);
 }
 .flex-collection-card img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  opacity: 0.8;
+  opacity: 0.9;
 }
 .flex-collection-card__overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 60%);
+  background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 60%);
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
@@ -206,10 +239,11 @@
 .flex-collection-card__title {
   font-weight: 700;
   font-size: 18px;
+  color: #fff;
 }
 .flex-collection-card__sub {
   font-size: 13px;
-  color: var(--flex-text-muted);
+  color: rgba(255,255,255,0.7);
 }
 .flex-collection-card__play {
   position: absolute;
@@ -222,6 +256,7 @@
   display: grid;
   place-items: center;
   color: #000;
+  font-size: 12px;
 }
 
 /* Explore */
@@ -235,7 +270,9 @@
   border-radius: 20px;
   padding: 16px;
   position: relative;
-  min-height: 100px;
+  min-height: 110px;
+  border: 1px solid var(--flex-border);
+  box-shadow: var(--flex-shadow);
 }
 .flex-explore-card__icon {
   width: 40px;
@@ -247,7 +284,7 @@
   font-size: 24px;
 }
 
-/* Workout detail - Leg Day */
+/* Workout detail - Leg Day / Pull Day */
 .flex-detail {
   background: var(--flex-bg);
   min-height: 100vh;
@@ -259,6 +296,7 @@
   overflow: hidden;
   margin-bottom: 16px;
   background: var(--flex-card);
+  border: 1px solid var(--flex-border);
 }
 .flex-detail__hero img {
   width: 100%;
@@ -268,7 +306,7 @@
 .flex-detail__hero-overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, transparent 50%);
+  background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 50%);
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
@@ -277,12 +315,15 @@
 .flex-detail__hero h1 {
   font-size: 32px;
   font-weight: 800;
+  color: #fff;
 }
 .flex-detail__meta {
   background: var(--flex-card);
   border-radius: 20px;
   padding: 16px;
   margin-bottom: 16px;
+  border: 1px solid var(--flex-border);
+  box-shadow: var(--flex-shadow);
 }
 .flex-detail__meta-row {
   display: flex;
@@ -291,6 +332,9 @@
   font-size: 14px;
   color: var(--flex-text-muted);
   margin-bottom: 12px;
+}
+.flex-detail__meta-row:last-child {
+  margin-bottom: 0;
 }
 .flex-detail__meta-row span {
   display: flex;
@@ -302,6 +346,8 @@
   border-radius: 20px;
   overflow: hidden;
   margin-bottom: 16px;
+  border: 1px solid var(--flex-border);
+  box-shadow: var(--flex-shadow);
 }
 .flex-exercise-row {
   display: flex;
@@ -310,6 +356,11 @@
   padding: 14px 16px;
   border-bottom: 1px solid var(--flex-border);
   cursor: pointer;
+  background: var(--flex-card);
+  transition: background 0.15s;
+}
+.flex-exercise-row:hover {
+  background: var(--flex-card-2);
 }
 .flex-exercise-row:last-child {
   border-bottom: none;
@@ -318,12 +369,13 @@
   width: 48px;
   height: 48px;
   border-radius: 14px;
-  background: #fff;
+  background: var(--flex-card-2);
   display: grid;
   place-items: center;
-  color: #000;
+  color: var(--flex-text);
   font-size: 20px;
   flex: none;
+  border: 1px solid var(--flex-border);
 }
 .flex-exercise-row__main {
   flex: 1;
@@ -332,6 +384,7 @@
 .flex-exercise-row__name {
   font-weight: 600;
   font-size: 16px;
+  color: var(--flex-text);
 }
 .flex-exercise-row__sets {
   font-size: 13px;
@@ -345,6 +398,7 @@
   background: var(--flex-bg);
   position: sticky;
   bottom: 0;
+  z-index: 5;
 }
 .flex-start-btn {
   flex: 1;
@@ -360,12 +414,10 @@
   justify-content: center;
   gap: 8px;
   cursor: pointer;
+  box-shadow: 0 4px 16px rgba(10,132,255,0.3);
 }
 
-/* Set logging - dark */
-.flex-log {
-  background: var(--flex-bg);
-}
+/* Set logging - light + dark */
 .flex-log__header {
   display: flex;
   align-items: center;
@@ -381,6 +433,8 @@
   border-radius: 20px;
   overflow: hidden;
   margin-bottom: 16px;
+  border: 1px solid var(--flex-border);
+  box-shadow: var(--flex-shadow);
 }
 .flex-log__exercise-head {
   display: flex;
@@ -388,6 +442,7 @@
   gap: 12px;
   padding: 14px 16px;
   border-bottom: 1px solid var(--flex-border);
+  background: var(--flex-card);
 }
 .flex-log__table-head {
   display: grid;
@@ -398,6 +453,7 @@
   color: var(--flex-text-soft);
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  background: var(--flex-card-2);
 }
 .flex-log__set-row {
   display: grid;
@@ -405,7 +461,8 @@
   gap: 8px;
   padding: 12px 16px;
   align-items: center;
-  border-bottom: 1px solid rgba(255,255,255,0.05);
+  border-bottom: 1px solid var(--flex-border);
+  background: var(--flex-card);
 }
 .flex-log__prev {
   display: flex;
@@ -415,12 +472,16 @@
   color: var(--flex-text-muted);
 }
 .flex-log__prev-badge {
-  background: #3a2a00;
-  color: #ff9f0a;
+  background: #fff3cd;
+  color: #856404;
   padding: 2px 6px;
   border-radius: 8px;
   font-size: 11px;
   font-weight: 700;
+}
+[data-mode="dark"] .flex-log__prev-badge {
+  background: #3a2a00;
+  color: #ff9f0a;
 }
 .flex-log__weight {
   font-weight: 600;
@@ -437,6 +498,7 @@
   font-size: 18px;
   text-align: center;
   border-left: 1px solid var(--flex-border);
+  color: var(--flex-text);
 }
 .flex-log__check {
   width: 36px;
@@ -448,30 +510,36 @@
   color: var(--flex-text-muted);
   cursor: pointer;
   justify-self: end;
+  border: 1px solid var(--flex-border);
 }
 .flex-log__check--done {
   background: linear-gradient(135deg, #0a84ff, #30d158);
   color: #fff;
+  border-color: transparent;
 }
 .flex-log__actions {
   display: flex;
   gap: 8px;
   padding: 12px 16px;
+  background: var(--flex-card-2);
 }
 .flex-log__btn {
-  background: var(--flex-card-2);
+  background: var(--flex-card);
   border-radius: 16px;
   padding: 10px 16px;
   font-size: 13px;
   color: var(--flex-text-muted);
-  border: none;
+  border: 1px solid var(--flex-border);
   display: flex;
   align-items: center;
   gap: 6px;
   cursor: pointer;
 }
+.flex-log__btn:hover {
+  background: var(--flex-card-2);
+}
 
-/* Challenges - FLEX */
+/* Challenges - FLEX light + dark */
 .flex-challenges__header {
   background: var(--flex-card);
   border-radius: 24px;
@@ -480,6 +548,8 @@
   align-items: center;
   justify-content: space-between;
   margin-bottom: 16px;
+  border: 1px solid var(--flex-border);
+  box-shadow: var(--flex-shadow);
 }
 .flex-challenges__level {
   display: flex;
@@ -495,10 +565,12 @@
   place-items: center;
   font-weight: 800;
   color: var(--flex-warning);
+  background: var(--flex-card);
 }
 .flex-challenges__xp {
   font-weight: 800;
   font-size: 20px;
+  color: var(--flex-text);
 }
 .flex-challenges__lv {
   background: var(--flex-warning);
@@ -521,6 +593,7 @@
   color: #000;
   position: relative;
   min-height: 160px;
+  border: 1px solid var(--flex-border);
 }
 .flex-challenge-card__xp {
   position: absolute;
@@ -547,12 +620,15 @@
   font-size: 32px;
   font-weight: 800;
   border: 3px solid #000;
+  color: #fff;
 }
 .flex-challenge-list {
   background: var(--flex-card);
   border-radius: 20px;
   overflow: hidden;
   margin-bottom: 16px;
+  border: 1px solid var(--flex-border);
+  box-shadow: var(--flex-shadow);
 }
 .flex-challenge-row {
   display: flex;
@@ -560,6 +636,10 @@
   gap: 14px;
   padding: 14px 16px;
   border-bottom: 1px solid var(--flex-border);
+  background: var(--flex-card);
+}
+.flex-challenge-row:last-child {
+  border-bottom: none;
 }
 .flex-challenge-row__icon {
   width: 44px;
@@ -570,6 +650,7 @@
   place-items: center;
   font-size: 20px;
   flex: none;
+  border: 1px solid var(--flex-border);
 }
 .flex-challenge-row__main {
   flex: 1;
@@ -577,6 +658,7 @@
 .flex-challenge-row__name {
   font-weight: 600;
   font-size: 14px;
+  color: var(--flex-text);
 }
 .flex-challenge-row__bar {
   height: 6px;
@@ -587,8 +669,11 @@
 }
 .flex-challenge-row__bar-fill {
   height: 100%;
-  background: #fff;
+  background: var(--flex-text);
   border-radius: 3px;
+}
+[data-mode="dark"] .flex-challenge-row__bar-fill {
+  background: #fff;
 }
 .flex-challenge-row__meta {
   font-size: 12px;
@@ -603,9 +688,11 @@
   display: flex;
   align-items: center;
   gap: 4px;
+  border: 1px solid var(--flex-border);
+  color: var(--flex-text);
 }
 
-/* Stats - FLEX */
+/* Stats - FLEX light + dark */
 .flex-stats-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -620,6 +707,8 @@
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  border: 1px solid var(--flex-border);
+  box-shadow: var(--flex-shadow);
 }
 .flex-stat-card__top {
   display: flex;
@@ -642,6 +731,7 @@
 .flex-stat-card__value {
   font-size: 24px;
   font-weight: 800;
+  color: var(--flex-text);
 }
 .flex-stat-card__sub {
   font-size: 11px;
@@ -661,11 +751,12 @@
   margin-top: -18px;
 }
 .flex-workout-week {
-  background: var(--flex-bg);
-  padding: 16px 0;
-  border-top: 1px solid var(--flex-border);
-  border-bottom: 1px solid var(--flex-border);
+  background: var(--flex-card);
+  padding: 16px;
+  border-radius: 20px;
+  border: 1px solid var(--flex-border);
   margin-bottom: 16px;
+  box-shadow: var(--flex-shadow);
 }
 .flex-workout-week__head {
   display: flex;
@@ -681,7 +772,7 @@
 }
 .flex-workout-week__bar {
   width: 3px;
-  background: var(--flex-card-2);
+  background: var(--flex-card-3);
   border-radius: 2px;
 }
 .flex-workout-week__bar--active {
