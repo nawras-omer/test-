@@ -1,19 +1,16 @@
-import { Link } from 'react-router-dom'
 import { TodaySummaryCard } from '@/components/dashboard/TodaySummaryCard'
 import { MealBreakdownCard } from '@/components/dashboard/MealBreakdownCard'
-import { RecentEntriesCard } from '@/components/dashboard/RecentEntriesCard'
 import { StatCards } from '@/components/dashboard/StatCards'
-import { CalendarIcon, PlusIcon, SparkleIcon } from '@/components/ui/Icons'
+import { PlusIcon } from '@/components/ui/Icons'
 import { useFoodLog } from '@/components/food/FoodLogProvider'
 import { useAuth } from '@/lib/auth'
 import { useEntries } from '@/lib/entries'
-import { formatDate } from '@/lib/format'
 import { greetingKey } from '@/lib/utils'
 import { useI18n } from '@/i18n'
 import { SectionSubNav } from '@/components/layout/SectionSubNav'
 
 export function DashboardPage() {
-  const { t, locale } = useI18n()
+  const { t } = useI18n()
   const { user } = useAuth()
   const { openFoodLog } = useFoodLog()
   const { todayTotals, status } = useEntries()
@@ -28,21 +25,6 @@ export function DashboardPage() {
           <p className="page__eyebrow">{t('dashboard.eyebrow')}</p>
           <h1 className="page__title">{t(greetingKey(), { name: firstName })}</h1>
           <p className="page__subtitle">{t('dashboard.subtitle')}</p>
-        </div>
-
-        <div className="page__actions">
-          <span className="badge badge--outline">
-            <CalendarIcon size={14} />
-            {formatDate(new Date(), locale, { weekday: 'long', day: 'numeric', month: 'long' })}
-          </span>
-          <Link className="btn btn--outline" to="/assistant">
-            <SparkleIcon size={17} />
-            {t('assistant.open')}
-          </Link>
-          <button type="button" className="btn btn--primary" onClick={() => openFoodLog()}>
-            <PlusIcon size={18} />
-            {t('actions.logFood')}
-          </button>
         </div>
       </header>
 
@@ -69,8 +51,6 @@ export function DashboardPage() {
         <MealBreakdownCard />
 
         <StatCards />
-
-        <RecentEntriesCard />
       </div>
 
       <button
