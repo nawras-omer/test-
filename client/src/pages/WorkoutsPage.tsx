@@ -7,6 +7,8 @@ import { useNavigate } from 'react-router-dom'
 import { useI18n } from '@/i18n'
 import { SectionSubNav } from '@/components/layout/SectionSubNav'
 
+// navigate kept for collection clicks
+
 const COLLECTION = [
   { id: 'cardio', name: 'Cardio', time: '32 min', color: '#4a90a4', image: '🏃' },
   { id: 'legday', name: 'Leg Day', time: '59 min', color: '#2a2a4a', image: '🦵' },
@@ -78,21 +80,6 @@ export function WorkoutsPage() {
                 </div>
               ))}
             </div>
-          </div>
-
-          {/* Start Workout */}
-          <div className="flex-start-card" onClick={() => navigate('/workout')}>
-            <div className="flex-start-card__icon">▶</div>
-            <h2>Start Workout</h2>
-            <p>Let Lex prepare your workout for today</p>
-          </div>
-
-          <div className="flex-new-empty">
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <span style={{ width: '32px', height: '32px', borderRadius: '10px', background: '#2a2a4a', display: 'grid', placeItems: 'center' }}>📄</span>
-              <span style={{ fontWeight: 600, fontSize: '14px' }}>New Empty Workout</span>
-            </div>
-            <div className="flex-plus" onClick={() => navigate('/workout?start=manual')}>+</div>
           </div>
 
           {/* My Collection */}
